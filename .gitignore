@@ -1,0 +1,16 @@
+# Data (too large for Git)
+data/
+*.csv
+*.pkl
+*.pt
+*.h5
+
+# Python
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.env
+
+# System
+.DS_Store
+Thumbs.db
