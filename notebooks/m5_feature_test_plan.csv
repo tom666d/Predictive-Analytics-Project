@@ -1,0 +1,29 @@
+Column name,Meaning,How to build this feature?,Priority,Already in current model?
+days_since_last_sale,Days since last non-zero sale,"For each store_id + item_id series, find the most recent date before t with sales > 0, then compute current_date - last_sale_date in days.",High,No
+nonzero_count_7,Number of non-zero sales days in past 7 days,Group by store_id + item_id. Use sales.shift(1).rolling(7).apply(lambda x: sum(x>0)).,High,No
+nonzero_count_28,Number of non-zero sales days in past 28 days,Group by store_id + item_id. Use sales.shift(1).rolling(28).apply(lambda x: sum(x>0)).,High,No
+zero_ratio_28,Share of zero-sales days in past 28 days,"Compute 1 - nonzero_count_28 / 28, or rolling mean of (sales==0) after shift(1).",High,No
+recently_active_7,Whether item sold at least once in past 7 days,Create 1 if nonzero_count_7 > 0 else 0.,Medium,No
+recently_active_28,Whether item sold at least once in past 28 days,Create 1 if nonzero_count_28 > 0 else 0.,Medium,No
+rmean_14,Mean sales over past 14 days,Group by store_id + item_id. Use sales.shift(1).rolling(14).mean().,High,No
+rmean_56,Mean sales over past 56 days,Group by store_id + item_id. Use sales.shift(1).rolling(56).mean().,High,No
+rmedian_7,Median sales over past 7 days,Group by store_id + item_id. Use sales.shift(1).rolling(7).median().,Medium,No
+rmedian_28,Median sales over past 28 days,Group by store_id + item_id. Use sales.shift(1).rolling(28).median().,High,No
+rmax_7,Maximum sales over past 7 days,Group by store_id + item_id. Use sales.shift(1).rolling(7).max().,Medium,No
+rmax_28,Maximum sales over past 28 days,Group by store_id + item_id. Use sales.shift(1).rolling(28).max().,Medium,No
+same_dow_mean_4w,Average sales from same weekday over last 4 weeks,"For each series, use lag_7, lag_14, lag_21, lag_28 and take their mean.",High,No
+same_dow_mean_8w,Average sales from same weekday over last 8 weeks,"For each series, use lag_7,14,21,28,35,42,49,56 and take their mean.",High,No
+same_dow_median_8w,Median sales from same weekday over last 8 weeks,"For each series, compute median of lag_7,14,21,28,35,42,49,56.",Medium,No
+price_vs_mean,Current price vs historical average price,"For each store_id + item_id, divide current sell_price by expanding mean of past sell_price values shifted by 1.",High,"Mentioned in Meeting, not in current notebook"
+price_vs_max,Current price vs historical max price,"For each store_id + item_id, divide current sell_price by expanding max of past sell_price values shifted by 1.",Medium,No
+discount_depth,How far below historical max price current price is,Compute 1 - sell_price / historical_max_price using past prices only.,High,No
+weeks_since_price_change,Weeks since last price change,"Within each store_id + item_id weekly price series, count weeks since sell_price changed from prior week.",High,No
+is_price_drop,Whether current price dropped vs last week,Create 1 if sell_price < lagged sell_price else 0.,Medium,No
+store_dept_mean_7,Average dept sales in same store over past 7 days,"Aggregate daily sales by store_id + dept_id + date, compute shifted rolling 7-day mean, then merge back.",High,No
+store_cat_mean_7,Average category sales in same store over past 7 days,"Aggregate daily sales by store_id + cat_id + date, compute shifted rolling 7-day mean, then merge back.",Medium,Notebook only has coarse cat/store features
+state_cat_mean_7,Average category sales in same state over past 7 days,"Aggregate daily sales by state_id + cat_id + date, compute shifted rolling 7-day mean, then merge back.",High,No
+item_mean_across_stores_7,Average same item sales across all stores over past 7 days,"Aggregate daily sales by item_id + date, compute shifted rolling 7-day mean, then merge back.",Medium,No
+is_event_minus_1,Whether tomorrow is an event day,"Using calendar by date, map event indicator of date+1 back to current row.",Medium,No
+is_event_minus_2,Whether two days later is an event day,"Using calendar by date, map event indicator of date+2 back to current row.",Medium,No
+is_event_plus_1,Whether yesterday was an event day,"Using calendar by date, map event indicator of date-1 back to current row.",Medium,No
+snap_effective,SNAP flag relevant to the row’s state only,"If state_id is CA use snap_CA, if TX use snap_TX, if WI use snap_WI.",High,Current notebook keeps all SNAP flags; this is cleaner
