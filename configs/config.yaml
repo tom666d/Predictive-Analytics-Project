@@ -1,0 +1,81 @@
+# ============================================================
+# M5 Forecasting Pipeline — Config
+# ============================================================
+# Edit this file to change features, model params, or paths.
+# No need to touch any .py files for routine experiments.
+ 
+# ── Data ────────────────────────────────────────────────────
+data:
+  path: "data/"                        # folder containing raw CSVs
+  n_days: 500                          # how many recent days to keep (memory limit)
+  val_days: 28                         # last N days held out for validation
+ 
+# ── Features ────────────────────────────────────────────────
+features:
+  lags: [1, 7, 28]                     # lag windows
+  rolling_means: [3, 7, 28]           # rolling mean windows
+  use_rolling_std: false               # rolling std (noisy, off by default)
+ 
+  # Final feature list (based on feature_importance_analysis_v1)
+  # Comment/uncomment to add or remove features
+  use:
+    - lag_1
+    - lag_7
+    - lag_28
+    - rmean_3
+    - rmean_7
+    - rmean_28
+    - price_change
+    - price_mean_7
+    - dayofweek
+    - month
+    - weekofyear
+    - is_weekend
+    - snap
+    - event_type
+    - sell_price
+    - store_sales_mean_7
+    - cat_sales_mean_7
+    - item_id
+    - dept_id
+    - cat_id
+    - store_id
+    - state_id
+    - wday
+ 
+# ── Model ────────────────────────────────────────────────────
+model:
+  # active_model: which model to train ("lgbm", "xgb", or "ensemble")
+  active_model: "lgbm"
+ 
+  lgbm:
+    objective: "tweedie"
+    tweedie_variance_power: 1.1
+    n_estimators: 1000
+    learning_rate: 0.05
+    num_leaves: 255
+    subsample: 0.8
+    colsample_bytree: 0.8
+    early_stopping_rounds: 50         # set to null to disable
+    log_every: 100
+ 
+  xgb:
+    objective: "reg:tweedie"
+    tweedie_variance_power: 1.1
+    n_estimators: 1000
+    learning_rate: 0.05
+    max_depth: 6
+    subsample: 0.8
+    colsample_bytree: 0.8
+    tree_method: "hist"
+    early_stopping_rounds: 50
+ 
+  ensemble:
+    models: ["lgbm", "xgb"]           # which models to combine
+    weights: [0.6, 0.4]               # must sum to 1.0
+ 
+# ── Output ───────────────────────────────────────────────────
+output:
+  submission_path: "submission.csv"
+  models_dir: "models/"               # where trained model files are saved
+  skip_training: false                # set to true to load saved models instead of retraining
