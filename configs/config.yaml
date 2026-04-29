@@ -50,11 +50,11 @@ features:
     - store_cat_mean_7
     - state_cat_mean_7
     - item_mean_across_stores_7
-    - nonzero_count_7
-    - nonzero_count_28
-    - zero_ratio_28
-    - recently_active_7
-    - recently_active_28
+    # - nonzero_count_7
+    # - nonzero_count_28
+    # - zero_ratio_28
+    # - recently_active_7
+    # - recently_active_28
  
 # ── Model ────────────────────────────────────────────────────
 model:

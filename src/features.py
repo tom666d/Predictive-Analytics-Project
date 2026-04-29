@@ -114,20 +114,20 @@ def build_features(df: pd.DataFrame, cfg: dict) -> pd.DataFrame:
         .astype("float32")
     )
     # ── Zero-sales features ──────────────────────────────────────
-    df["nonzero_count_7"] = (
-        g.shift(1).rolling(7).apply(lambda x: (x > 0).sum(), raw=True)
-        .astype("float32")
-    )
+    # df["nonzero_count_7"] = (
+    #     g.shift(1).rolling(7).apply(lambda x: (x > 0).sum(), raw=True)
+    #     .astype("float32")
+    # )
 
-    df["nonzero_count_28"] = (
-        g.shift(1).rolling(28).apply(lambda x: (x > 0).sum(), raw=True)
-        .astype("float32")
-    )
+    # df["nonzero_count_28"] = (
+    #     g.shift(1).rolling(28).apply(lambda x: (x > 0).sum(), raw=True)
+    #     .astype("float32")
+    # )
 
-    df["zero_ratio_28"] = (1 - df["nonzero_count_28"] / 28).astype("float32")
+    # df["zero_ratio_28"] = (1 - df["nonzero_count_28"] / 28).astype("float32")
 
-    df["recently_active_7"]  = (df["nonzero_count_7"]  > 0).astype("int8")
-    df["recently_active_28"] = (df["nonzero_count_28"] > 0).astype("int8")
+    # df["recently_active_7"]  = (df["nonzero_count_7"]  > 0).astype("int8")
+    # df["recently_active_28"] = (df["nonzero_count_28"] > 0).astype("int8")
 
     return df
 def build_features_for_day(full_df: pd.DataFrame, cfg: dict) -> pd.DataFrame:
@@ -171,18 +171,18 @@ def build_features_for_day(full_df: pd.DataFrame, cfg: dict) -> pd.DataFrame:
     full_df["is_weekend"] = (full_df["dayofweek"] >= 5).astype(int)
     
     # ── Zero-sales features ──────────────────────────────────────
-    full_df["nonzero_count_7"] = (
-        g["sales"].shift(1).rolling(7).apply(lambda x: (x > 0).sum(), raw=True)
-    )
+    # full_df["nonzero_count_7"] = (
+    #     g["sales"].shift(1).rolling(7).apply(lambda x: (x > 0).sum(), raw=True)
+    # )
 
-    full_df["nonzero_count_28"] = (
-        g["sales"].shift(1).rolling(28).apply(lambda x: (x > 0).sum(), raw=True)
-    )
+    # full_df["nonzero_count_28"] = (
+    #     g["sales"].shift(1).rolling(28).apply(lambda x: (x > 0).sum(), raw=True)
+    # )
 
-    full_df["zero_ratio_28"] = (1 - full_df["nonzero_count_28"] / 28)
+    # full_df["zero_ratio_28"] = (1 - full_df["nonzero_count_28"] / 28)
 
-    full_df["recently_active_7"]  = (full_df["nonzero_count_7"]  > 0).astype(int)
-    full_df["recently_active_28"] = (full_df["nonzero_count_28"] > 0).astype(int)
+    # full_df["recently_active_7"]  = (full_df["nonzero_count_7"]  > 0).astype(int)
+    # full_df["recently_active_28"] = (full_df["nonzero_count_28"] > 0).astype(int)
 
     # ── Hierarchical means ───────────────────────────────────────
     full_df["store_dept_mean_7"] = (
