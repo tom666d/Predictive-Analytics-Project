@@ -237,13 +237,34 @@ def main(config_path: str = "configs/config.yaml"):
     print(f"\n── Step 6: Recursive 28-day prediction ──")
     preds = recursive_predict(df, calendar, sell_prices, features, cat_cols, final_models, cfg)
     print(f"Predictions shape: {preds.shape}")
- 
-    # ── 8. Submission ────────────────────────────────────────
-    print(f"\n── Step 7: Building submission ──")
+    
+    # ── 8. Feature Importance ────────────────────────────────
+    print(f"\n── Step 8: Feature Importance ──")
+
+    # take the average of feature importances across all store models
+    importance_list = []
+    for store, model in final_models.items():
+        importance_list.append(model.feature_importances_)
+
+    avg_importance = np.mean(importance_list, axis=0)
+
+    importance = pd.DataFrame({
+        "feature": features,
+        "importance": avg_importance
+    }).sort_values("importance", ascending=False)
+
+    print(importance.to_string(index=False))
+    importance.to_csv("feature_importance.csv", index=False)
+    print("Feature importance saved to: feature_importance.csv")
+
+    # ── 9. Submission ────────────────────────────────────────
+    print(f"\n── Step 9: Building submission ──")
     sample_path = os.path.join(cfg["data"]["path"], "sample_submission.csv")
     submission  = build_submission(preds, df, sample_path)
  
-    out_path = cfg["output"]["submission_path"]
+    from datetime import datetime
+    timestamp = datetime.now().strftime("%m%d_%H%M")
+    out_path = cfg["output"]["submission_path"].replace(".csv", f"_{timestamp}.csv")
     submission.to_csv(out_path, index=False)
     print(f"Submission saved to: {out_path}  shape: {submission.shape}")
  

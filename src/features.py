@@ -77,10 +77,59 @@ def build_features(df: pd.DataFrame, cfg: dict) -> pd.DataFrame:
         .transform(lambda x: x.shift(1).rolling(7).mean())
         .astype("float32")
     )
- 
+    # ── High impact events ───────────────────────────────────────
+    high_impact = ["LaborDay", "SuperBowl", "Easter"]
+    df["is_high_impact_event"] = df["event_name_1"].isin(high_impact).astype("int8")
+
+    # ── Price vs historical mean ─────────────────────────────────
+    price_hist_mean = pg.transform("mean").astype("float32")
+    df["price_vs_mean"] = (df["sell_price"] / price_hist_mean).astype("float32")
+    df["price_vs_mean"] = df["price_vs_mean"].replace([np.inf, -np.inf], 1).fillna(1)
+
+    # ── Year-ago lags ────────────────────────────────────────────
+    for lag in [364, 365]:
+        df[f"lag_{lag}"] = g.shift(lag).astype("float32")
+    # ── Store-dept / store-cat / state-cat hierarchical means ────
+    df["store_dept_mean_7"] = (
+        df.groupby(["store_id", "dept_id", "date"], observed=True)["sales"]
+        .transform(lambda x: x.shift(1).rolling(7).mean())
+        .astype("float32")
+    )
+
+    df["store_cat_mean_7"] = (
+        df.groupby(["store_id", "cat_id", "date"], observed=True)["sales"]
+        .transform(lambda x: x.shift(1).rolling(7).mean())
+        .astype("float32")
+    )
+
+    df["state_cat_mean_7"] = (
+        df.groupby(["state_id", "cat_id", "date"], observed=True)["sales"]
+        .transform(lambda x: x.shift(1).rolling(7).mean())
+        .astype("float32")
+    )
+
+    df["item_mean_across_stores_7"] = (
+        df.groupby(["item_id", "date"], observed=True)["sales"]
+        .transform(lambda x: x.shift(1).rolling(7).mean())
+        .astype("float32")
+    )
+    # ── Zero-sales features ──────────────────────────────────────
+    df["nonzero_count_7"] = (
+        g.shift(1).rolling(7).apply(lambda x: (x > 0).sum(), raw=True)
+        .astype("float32")
+    )
+
+    df["nonzero_count_28"] = (
+        g.shift(1).rolling(28).apply(lambda x: (x > 0).sum(), raw=True)
+        .astype("float32")
+    )
+
+    df["zero_ratio_28"] = (1 - df["nonzero_count_28"] / 28).astype("float32")
+
+    df["recently_active_7"]  = (df["nonzero_count_7"]  > 0).astype("int8")
+    df["recently_active_28"] = (df["nonzero_count_28"] > 0).astype("int8")
+
     return df
- 
- 
 def build_features_for_day(full_df: pd.DataFrame, cfg: dict) -> pd.DataFrame:
     """
     Lightweight version used inside the recursive prediction loop.
@@ -120,7 +169,41 @@ def build_features_for_day(full_df: pd.DataFrame, cfg: dict) -> pd.DataFrame:
     full_df["month"]      = full_df["date"].dt.month
     full_df["weekofyear"] = full_df["date"].dt.isocalendar().week.astype("int")
     full_df["is_weekend"] = (full_df["dayofweek"] >= 5).astype(int)
- 
+    
+    # ── Zero-sales features ──────────────────────────────────────
+    full_df["nonzero_count_7"] = (
+        g["sales"].shift(1).rolling(7).apply(lambda x: (x > 0).sum(), raw=True)
+    )
+
+    full_df["nonzero_count_28"] = (
+        g["sales"].shift(1).rolling(28).apply(lambda x: (x > 0).sum(), raw=True)
+    )
+
+    full_df["zero_ratio_28"] = (1 - full_df["nonzero_count_28"] / 28)
+
+    full_df["recently_active_7"]  = (full_df["nonzero_count_7"]  > 0).astype(int)
+    full_df["recently_active_28"] = (full_df["nonzero_count_28"] > 0).astype(int)
+
+    # ── Hierarchical means ───────────────────────────────────────
+    full_df["store_dept_mean_7"] = (
+        full_df.groupby(["store_id", "dept_id", "date"], observed=True)["sales"]
+        .transform(lambda x: x.shift(1).rolling(7).mean())
+    )
+
+    full_df["store_cat_mean_7"] = (
+        full_df.groupby(["store_id", "cat_id", "date"], observed=True)["sales"]
+        .transform(lambda x: x.shift(1).rolling(7).mean())
+    )
+
+    full_df["state_cat_mean_7"] = (
+        full_df.groupby(["state_id", "cat_id", "date"], observed=True)["sales"]
+        .transform(lambda x: x.shift(1).rolling(7).mean())
+    )
+
+    full_df["item_mean_across_stores_7"] = (
+        full_df.groupby(["item_id", "date"], observed=True)["sales"]
+        .transform(lambda x: x.shift(1).rolling(7).mean())
+    )
     return full_df
  
  

@@ -70,8 +70,7 @@ def load_and_preprocess(cfg: dict):
  
     # ── Events: keep type only, fill NaN → "None" ───────────
     df["event_type"] = df["event_type_1"].fillna("None")
-    df.drop(columns=["event_name_1", "event_name_2", "event_type_1", "event_type_2"],
-            inplace=True)
+    df.drop(columns=["event_name_2", "event_type_1", "event_type_2"], inplace=True)
  
     # ── Drop columns no longer needed ───────────────────────
     df.drop(columns=["d", "wm_yr_wk", "weekday", "year"], inplace=True)
