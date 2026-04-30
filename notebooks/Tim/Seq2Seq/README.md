@@ -13,3 +13,10 @@ Initial setup:
 - Output: next 28 days of sales
 - Transform: log1p(sales)
 - Model: GRU sequence forecasting model
+
+
+## Current Result
+
+| Version | Model | Input | N_WINDOWS | Output Activation | Public Score | Private Score | Notes |
+|---|---|---|---:|---|---:|---:|---|
+| v1 | GRU | Past 90 days sales only | 6 | Softplus | 1.81935 | 1.82583 | Valid full Kaggle submission |
