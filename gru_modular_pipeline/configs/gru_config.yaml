@@ -1,0 +1,52 @@
+# GRU direct-output pipeline config for M5 Forecasting Accuracy
+# Edit this file instead of changing notebook/model code.
+
+data:
+  # The loader will use the first existing path in this list.
+  path_candidates:
+    - "C:/Users/Ariel/Desktop/MSBA/Predictive Analytics/Group assignment/m5-forecasting-accuracy"
+    - "/kaggle/input/competitions/m5-forecasting-accuracy"
+    - "./data"
+  sales_file: "sales_train_validation.csv"
+  sample_submission_file: "sample_submission.csv"
+  calendar_file: "calendar.csv"
+  prices_file: "sell_prices.csv"
+  max_series: null       # use 1000/5000 for debugging; null for final
+
+forecast:
+  input_len: 90
+  horizon: 28
+  n_windows: 6
+  step: 28
+
+training:
+  seed: 42
+  batch_size: 512
+  epochs: 8
+  lr: 0.001
+  weight_decay: 0.00001
+  loss: "smooth_l1"      # options: smooth_l1, mse, mae
+  num_workers: 0         # keep 0 for Windows/Jupyter stability
+  pin_memory: false
+
+model:
+  rnn_type: "gru"        # options: gru, lstm
+  hidden_size: 64
+  num_layers: 1
+  dropout: 0.1
+  head_hidden_size: 128
+  static_cat_cols: ["item_id", "dept_id", "cat_id", "store_id", "state_id"]
+  event_embedding_dim: 4
+  use_softplus_output: true
+
+features:
+  use_price_features: true
+  lags: [1, 7, 28, 365]
+  rolling_means: [3, 7, 28]
+  calendar_numeric_cols: ["dayofweek", "month", "weekofyear", "wday", "snap_CA", "snap_TX", "snap_WI"]
+  event_col: "event_type_1"
+  price_feature_cols: ["last_price", "future_price_mean", "price_change", "price_vs_mean"]
+
+output:
+  submission_path: "output/submission_gru_direct_config.csv"
+  save_model_path: "output/best_gru_model.pt"
