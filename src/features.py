@@ -113,6 +113,63 @@ def build_features(df: pd.DataFrame, cfg: dict) -> pd.DataFrame:
         .transform(lambda x: x.shift(1).rolling(7).mean())
         .astype("float32")
     )
+    # ── Weekday-specific recent features ─────────────────────────
+    # These mimic the strong Kaggle baseline:
+    # average sales over recent same weekdays.
+
+    df["weekday_rmean_28"] = (
+        df.groupby(["store_id", "item_id", "dayofweek"], observed=True)["sales"]
+        .transform(lambda x: x.shift(1).rolling(4).mean())
+        .astype("float32")
+    )
+
+    df["weekday_rmean_56"] = (
+        df.groupby(["store_id", "item_id", "dayofweek"], observed=True)["sales"]
+        .transform(lambda x: x.shift(1).rolling(8).mean())
+        .astype("float32")
+    )
+
+    df["weekday_lag_7"] = (
+        df.groupby(["store_id", "item_id"], observed=True)["sales"]
+        .transform(lambda x: x.shift(7))
+        .astype("float32")
+    )
+
+    df["weekday_lag_14"] = (
+        df.groupby(["store_id", "item_id"], observed=True)["sales"]
+        .transform(lambda x: x.shift(14))
+        .astype("float32")
+    )
+
+    df["weekday_lag_21"] = (
+        df.groupby(["store_id", "item_id"], observed=True)["sales"]
+        .transform(lambda x: x.shift(21))
+        .astype("float32")
+    )
+
+    df["weekday_lag_28"] = (
+        df.groupby(["store_id", "item_id"], observed=True)["sales"]
+        .transform(lambda x: x.shift(28))
+        .astype("float32")
+    )
+
+    df["recent_28_mean"] = (
+        df.groupby(["store_id", "item_id"], observed=True)["sales"]
+        .transform(lambda x: x.shift(1).rolling(28).mean())
+        .astype("float32")
+    )
+
+    df["recent_7_mean"] = (
+        df.groupby(["store_id", "item_id"], observed=True)["sales"]
+        .transform(lambda x: x.shift(1).rolling(7).mean())
+        .astype("float32")
+    )
+
+    df["recent_28_to_7_ratio"] = (
+        df["recent_7_mean"] / df["recent_28_mean"]
+    ).replace([np.inf, -np.inf], 1).fillna(1).astype("float32")
+
+    df["weekday_baseline_28"] = df["weekday_rmean_28"]
     # ── Zero-sales features ──────────────────────────────────────
     # df["nonzero_count_7"] = (
     #     g.shift(1).rolling(7).apply(lambda x: (x > 0).sum(), raw=True)
