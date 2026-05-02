@@ -7,7 +7,7 @@
 # ── Data ────────────────────────────────────────────────────
 data:
   path: "data/"                        # folder containing raw CSVs
-  n_days: 500                          # how many recent days to keep (memory limit)
+  n_days: 1913                          # how many recent days to keep (memory limit)
   val_days: 28                         # last N days held out for validation
  
 # ── Features ────────────────────────────────────────────────
@@ -73,13 +73,13 @@ model:
  
   lgbm:
     objective: "tweedie"
-    tweedie_variance_power: 1.1 # change to 1.1 again
-    n_estimators: 200
-    learning_rate: 0.05
-    num_leaves: 255
-    subsample: 0.8
-    colsample_bytree: 0.8
-    early_stopping_rounds: 20         # set to null to disable
+    tweedie_variance_power: 1.229472459025745 # change to 1.1 again
+    n_estimators: 1000
+    learning_rate: 0.03217976790895442
+    num_leaves: 246
+    subsample: 0.6680666932626698
+    colsample_bytree: 0.5693174207084009
+    early_stopping_rounds: 50         # set to null to disable
     log_every: 100
  
   xgb:
@@ -99,7 +99,7 @@ model:
  
 # ── Tuning ───────────────────────────────────────────────────
 tuning:
-  enabled: true    # set to true to run Optuna tuning
+  enabled: false    # set to true to run Optuna tuning
   n_trials: 10
 
 
@@ -108,3 +108,4 @@ output:
   submission_path: "submission.csv"
   models_dir: "models/"               # where trained model files are saved
   skip_training: false                # set to true to load saved models instead of retraining
+  

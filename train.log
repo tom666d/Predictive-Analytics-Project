@@ -3,201 +3,118 @@ main() started
 ── Step 1: Preprocessing ──
 Loading raw CSVs...
 Melting wide → long...
-Preprocessing done. df shape: (15245000, 14)
+Preprocessing done. df shape: (58327370, 14)
 
 ── Step 2: Feature engineering ──
 
 ── Step 3: Train/val split ──
-Train: 2014-12-12 → 2016-03-27 (14,391,280 rows)
+Train: 2011-01-29 → 2016-03-27 (57,473,650 rows)
 Val  : 2016-03-28 → 2016-04-24 (853,720 rows)
 Features (27): ['lag_1', 'lag_7', 'lag_28', 'rmean_3', 'rmean_7', 'rmean_28', 'price_change', 'price_mean_7', 'price_vs_mean', 'dayofweek', 'month', 'weekofyear', 'snap', 'event_type', 'sell_price', 'store_sales_mean_7', 'cat_sales_mean_7', 'item_id', 'dept_id', 'cat_id', 'store_id', 'wday', 'store_dept_mean_7', 'item_mean_across_stores_7', 'weekday_rmean_28', 'weekday_rmean_56', 'recent_28_to_7_ratio']
 Categorical: ['event_type', 'item_id', 'dept_id', 'cat_id', 'store_id']
 
-── Hyperparameter Tuning ──
+── Step 4: Training (lgbm) with validation ──
   Training lgbm — store: CA_1
 [LightGBM] [Warning] Categorical features with more bins than the configured maximum bin number found.
 [LightGBM] [Warning] For categorical features, max_bin and max_bin_by_feature may be ignored with a large number of categories.
-[LightGBM] [Info] Auto-choosing row-wise multi-threading, the overhead of testing was 0.026526 seconds.
+[LightGBM] [Info] Auto-choosing row-wise multi-threading, the overhead of testing was 0.141271 seconds.
 You can set `force_row_wise=true` to remove the overhead.
 And if memory is not enough, you can set `force_col_wise=true`.
-[LightGBM] [Info] Total Bins 5981
-[LightGBM] [Info] Number of data points in the train set: 1439128, number of used features: 25
-[LightGBM] [Info] Start training from score 0.362088
-[100]	valid_0's rmse: 2.13666	valid_0's tweedie: 65.068
-[200]	valid_0's rmse: 2.00344	valid_0's tweedie: 64.9909
+[LightGBM] [Info] Total Bins 6132
+[LightGBM] [Info] Number of data points in the train set: 5747365, number of used features: 27
+[LightGBM] [Info] Start training from score 0.275486
+[100]	valid_0's rmse: 2.00601	valid_0's tweedie: 6.72558
+[200]	valid_0's rmse: 2.00275	valid_0's tweedie: 6.72174
+[300]	valid_0's rmse: 2.00143	valid_0's tweedie: 6.72125
   Training lgbm — store: CA_2
 [LightGBM] [Warning] Categorical features with more bins than the configured maximum bin number found.
 [LightGBM] [Warning] For categorical features, max_bin and max_bin_by_feature may be ignored with a large number of categories.
-[LightGBM] [Info] Auto-choosing row-wise multi-threading, the overhead of testing was 0.031059 seconds.
+[LightGBM] [Info] Auto-choosing row-wise multi-threading, the overhead of testing was 0.208452 seconds.
 You can set `force_row_wise=true` to remove the overhead.
 And if memory is not enough, you can set `force_col_wise=true`.
-[LightGBM] [Info] Total Bins 5765
-[LightGBM] [Info] Number of data points in the train set: 1439128, number of used features: 25
-[LightGBM] [Info] Start training from score 0.117748
-[100]	valid_0's rmse: 1.96724	valid_0's tweedie: 63.7656
-[200]	valid_0's rmse: 1.83947	valid_0's tweedie: 63.711
+[LightGBM] [Info] Total Bins 5716
+[LightGBM] [Info] Number of data points in the train set: 5747365, number of used features: 27
+[LightGBM] [Info] Start training from score -0.033064
+[100]	valid_0's rmse: 1.84535	valid_0's tweedie: 6.75745
   Training lgbm — store: CA_3
 [LightGBM] [Warning] Categorical features with more bins than the configured maximum bin number found.
 [LightGBM] [Warning] For categorical features, max_bin and max_bin_by_feature may be ignored with a large number of categories.
-[LightGBM] [Info] Auto-choosing row-wise multi-threading, the overhead of testing was 0.023414 seconds.
+[LightGBM] [Info] Auto-choosing row-wise multi-threading, the overhead of testing was 0.113440 seconds.
 You can set `force_row_wise=true` to remove the overhead.
 And if memory is not enough, you can set `force_col_wise=true`.
-[LightGBM] [Info] Total Bins 6503
-[LightGBM] [Info] Number of data points in the train set: 1439128, number of used features: 25
-[LightGBM] [Info] Start training from score 0.710138
-[100]	valid_0's rmse: 2.69285	valid_0's tweedie: 89.2187
-[200]	valid_0's rmse: 2.42989	valid_0's tweedie: 89.1104
+[LightGBM] [Info] Total Bins 6730
+[LightGBM] [Info] Number of data points in the train set: 5747365, number of used features: 27
+[LightGBM] [Info] Start training from score 0.650172
+[100]	valid_0's rmse: 2.46347	valid_0's tweedie: 8.56652
+[200]	valid_0's rmse: 2.45194	valid_0's tweedie: 8.56053
+[300]	valid_0's rmse: 2.44133	valid_0's tweedie: 8.55861
+[400]	valid_0's rmse: 2.43424	valid_0's tweedie: 8.55765
   Training lgbm — store: CA_4
 [LightGBM] [Warning] Categorical features with more bins than the configured maximum bin number found.
 [LightGBM] [Warning] For categorical features, max_bin and max_bin_by_feature may be ignored with a large number of categories.
-[LightGBM] [Info] Auto-choosing row-wise multi-threading, the overhead of testing was 0.057544 seconds.
+[LightGBM] [Info] Auto-choosing row-wise multi-threading, the overhead of testing was 0.211748 seconds.
 You can set `force_row_wise=true` to remove the overhead.
 And if memory is not enough, you can set `force_col_wise=true`.
-[LightGBM] [Info] Total Bins 5250
-[LightGBM] [Info] Number of data points in the train set: 1439128, number of used features: 25
-[LightGBM] [Info] Start training from score -0.238259
-[100]	valid_0's rmse: 1.37666	valid_0's tweedie: 38.3395
-[200]	valid_0's rmse: 1.33139	valid_0's tweedie: 38.3029
+[LightGBM] [Info] Total Bins 5389
+[LightGBM] [Info] Number of data points in the train set: 5747365, number of used features: 27
+[LightGBM] [Info] Start training from score -0.355108
+[100]	valid_0's rmse: 1.33062	valid_0's tweedie: 4.54283
+[200]	valid_0's rmse: 1.32844	valid_0's tweedie: 4.54124
   Training lgbm — store: TX_1
 [LightGBM] [Warning] Categorical features with more bins than the configured maximum bin number found.
 [LightGBM] [Warning] For categorical features, max_bin and max_bin_by_feature may be ignored with a large number of categories.
-[LightGBM] [Info] Auto-choosing row-wise multi-threading, the overhead of testing was 0.075195 seconds.
+[LightGBM] [Info] Auto-choosing row-wise multi-threading, the overhead of testing was 0.233357 seconds.
 You can set `force_row_wise=true` to remove the overhead.
 And if memory is not enough, you can set `force_col_wise=true`.
-[LightGBM] [Info] Total Bins 5871
-[LightGBM] [Info] Number of data points in the train set: 1439128, number of used features: 25
-[LightGBM] [Info] Start training from score 0.031111
-[100]	valid_0's rmse: 1.72928	valid_0's tweedie: 47.3329
-[200]	valid_0's rmse: 1.58441	valid_0's tweedie: 47.2714
+[LightGBM] [Info] Total Bins 6200
+[LightGBM] [Info] Number of data points in the train set: 5747365, number of used features: 27
+[LightGBM] [Info] Start training from score -0.043536
+[100]	valid_0's rmse: 1.58278	valid_0's tweedie: 5.09222
   Training lgbm — store: TX_2
 [LightGBM] [Warning] Categorical features with more bins than the configured maximum bin number found.
 [LightGBM] [Warning] For categorical features, max_bin and max_bin_by_feature may be ignored with a large number of categories.
-[LightGBM] [Info] Auto-choosing row-wise multi-threading, the overhead of testing was 0.030447 seconds.
+[LightGBM] [Info] Auto-choosing row-wise multi-threading, the overhead of testing was 0.225826 seconds.
 You can set `force_row_wise=true` to remove the overhead.
 And if memory is not enough, you can set `force_col_wise=true`.
-[LightGBM] [Info] Total Bins 6229
-[LightGBM] [Info] Number of data points in the train set: 1439128, number of used features: 25
-[LightGBM] [Info] Start training from score 0.213461
-[100]	valid_0's rmse: 1.83279	valid_0's tweedie: 56.0092
-[200]	valid_0's rmse: 1.67474	valid_0's tweedie: 55.9447
+[LightGBM] [Info] Total Bins 6502
+[LightGBM] [Info] Number of data points in the train set: 5747365, number of used features: 27
+[LightGBM] [Info] Start training from score 0.211956
+[100]	valid_0's rmse: 1.68549	valid_0's tweedie: 5.87349
   Training lgbm — store: TX_3
 [LightGBM] [Warning] Categorical features with more bins than the configured maximum bin number found.
 [LightGBM] [Warning] For categorical features, max_bin and max_bin_by_feature may be ignored with a large number of categories.
-[LightGBM] [Info] Auto-choosing row-wise multi-threading, the overhead of testing was 0.058790 seconds.
+[LightGBM] [Info] Auto-choosing row-wise multi-threading, the overhead of testing was 0.248018 seconds.
 You can set `force_row_wise=true` to remove the overhead.
 And if memory is not enough, you can set `force_col_wise=true`.
-[LightGBM] [Info] Total Bins 6105
-[LightGBM] [Info] Number of data points in the train set: 1439128, number of used features: 25
-[LightGBM] [Info] Start training from score 0.186856
-[100]	valid_0's rmse: 1.79936	valid_0's tweedie: 54.1944
-[200]	valid_0's rmse: 1.66626	valid_0's tweedie: 54.1275
+[LightGBM] [Info] Total Bins 6237
+[LightGBM] [Info] Number of data points in the train set: 5747365, number of used features: 27
+[LightGBM] [Info] Start training from score 0.040165
+[100]	valid_0's rmse: 1.66616	valid_0's tweedie: 5.71566
   Training lgbm — store: WI_1
 [LightGBM] [Warning] Categorical features with more bins than the configured maximum bin number found.
 [LightGBM] [Warning] For categorical features, max_bin and max_bin_by_feature may be ignored with a large number of categories.
-[LightGBM] [Info] Auto-choosing row-wise multi-threading, the overhead of testing was 0.027165 seconds.
+[LightGBM] [Info] Auto-choosing row-wise multi-threading, the overhead of testing was 0.218913 seconds.
 You can set `force_row_wise=true` to remove the overhead.
 And if memory is not enough, you can set `force_col_wise=true`.
-[LightGBM] [Info] Total Bins 5860
-[LightGBM] [Info] Number of data points in the train set: 1439128, number of used features: 26
-[LightGBM] [Info] Start training from score 0.146024
-[100]	valid_0's rmse: 1.66094	valid_0's tweedie: 54.9178
-[200]	valid_0's rmse: 1.57742	valid_0's tweedie: 54.8624
+[LightGBM] [Info] Total Bins 5905
+[LightGBM] [Info] Number of data points in the train set: 5747365, number of used features: 27
+[LightGBM] [Info] Start training from score -0.130982
+[100]	valid_0's rmse: 1.58052	valid_0's tweedie: 5.99451
+[200]	valid_0's rmse: 1.57072	valid_0's tweedie: 5.98887
+[300]	valid_0's rmse: 1.56918	valid_0's tweedie: 5.98763
+[400]	valid_0's rmse: 1.56851	valid_0's tweedie: 5.98735
   Training lgbm — store: WI_2
 [LightGBM] [Warning] Categorical features with more bins than the configured maximum bin number found.
 [LightGBM] [Warning] For categorical features, max_bin and max_bin_by_feature may be ignored with a large number of categories.
-[LightGBM] [Info] Auto-choosing row-wise multi-threading, the overhead of testing was 0.034142 seconds.
+[LightGBM] [Info] Auto-choosing row-wise multi-threading, the overhead of testing was 0.225299 seconds.
 You can set `force_row_wise=true` to remove the overhead.
 And if memory is not enough, you can set `force_col_wise=true`.
-[LightGBM] [Info] Total Bins 6279
-[LightGBM] [Info] Number of data points in the train set: 1439128, number of used features: 26
-[LightGBM] [Info] Start training from score 0.335422
-[100]	valid_0's rmse: 2.86383	valid_0's tweedie: 76.0619
-[200]	valid_0's rmse: 2.5554	valid_0's tweedie: 75.9552
+[LightGBM] [Info] Total Bins 6287
+[LightGBM] [Info] Number of data points in the train set: 5747365, number of used features: 27
+[LightGBM] [Info] Start training from score 0.106455
+[100]	valid_0's rmse: 2.54252	valid_0's tweedie: 7.25875
+[200]	valid_0's rmse: 2.47095	valid_0's tweedie: 7.24998
+[300]	valid_0's rmse: 2.46434	valid_0's tweedie: 7.2488
   Training lgbm — store: WI_3
 [LightGBM] [Warning] Categorical features with more bins than the configured maximum bin number found.
 [LightGBM] [Warning] For categorical features, max_bin and max_bin_by_feature may be ignored with a large number of categories.
-[LightGBM] [Info] Auto-choosing row-wise multi-threading, the overhead of testing was 0.061602 seconds.
-You can set `force_row_wise=true` to remove the overhead.
-And if memory is not enough, you can set `force_col_wise=true`./Users/tomhsieh6/Desktop/MSBA Predictive Analytics/Project/Predictive-Analytics-Project/src/train.py:277: FutureWarning: The default of observed=False is deprecated and will be changed to True in a future version of pandas. Pass observed=False to retain current behavior or observed=True to adopt the future default and silence this warning.
-  for store_id, store_items in items.groupby("store_id"):
-/opt/anaconda3/lib/python3.13/site-packages/sklearn/utils/validation.py:2739: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
-  warnings.warn(
-[W 2026-05-02 07:47:23,972] Trial 0 failed with parameters: {'num_leaves': 310, 'learning_rate': 0.013280484908194059, 'subsample': 0.6309932216247142, 'colsample_bytree': 0.5146929756625136, 'tweedie_variance_power': 1.0229802564065005} because of the following error: ValueError("could not convert string to float: 'None'").
-Traceback (most recent call last):
-  File "/opt/anaconda3/lib/python3.13/site-packages/optuna/study/_optimize.py", line 206, in _run_trial
-    value_or_values = func(trial)
-  File "/Users/tomhsieh6/Desktop/MSBA Predictive Analytics/Project/Predictive-Analytics-Project/src/train.py", line 282, in objective
-    preds = models[store_id].predict(X_val)
-  File "/opt/anaconda3/lib/python3.13/site-packages/lightgbm/sklearn.py", line 1108, in predict
-    X = _LGBMValidateData(
-        self,
-    ...<11 lines>...
-        ensure_min_samples=1,
-    )
-  File "/opt/anaconda3/lib/python3.13/site-packages/sklearn/utils/validation.py", line 2944, in validate_data
-    out = check_array(X, input_name="X", **check_params)
-  File "/opt/anaconda3/lib/python3.13/site-packages/sklearn/utils/validation.py", line 1055, in check_array
-    array = _asarray_with_order(array, order=order, dtype=dtype, xp=xp)
-  File "/opt/anaconda3/lib/python3.13/site-packages/sklearn/utils/_array_api.py", line 839, in _asarray_with_order
-    array = numpy.asarray(array, order=order, dtype=dtype)
-ValueError: could not convert string to float: 'None'
-[W 2026-05-02 07:47:23,977] Trial 0 failed with value None.
-
-[LightGBM] [Info] Total Bins 6256
-[LightGBM] [Info] Number of data points in the train set: 1439128, number of used features: 26
-[LightGBM] [Info] Start training from score 0.092452
-[100]	valid_0's rmse: 2.06154	valid_0's tweedie: 56.7199
-[200]	valid_0's rmse: 1.83493	valid_0's tweedie: 56.651
-Traceback (most recent call last):
-  File "/Users/tomhsieh6/Desktop/MSBA Predictive Analytics/Project/Predictive-Analytics-Project/src/train.py", line 434, in <module>
-    main(args.config)
-    ~~~~^^^^^^^^^^^^^
-  File "/Users/tomhsieh6/Desktop/MSBA Predictive Analytics/Project/Predictive-Analytics-Project/src/train.py", line 335, in main
-    best_params = tune_hyperparams(
-        train_df, val_df, features, cat_cols, target, cfg,
-        calendar, sell_prices, n_trials=n_trials
-    )
-  File "/Users/tomhsieh6/Desktop/MSBA Predictive Analytics/Project/Predictive-Analytics-Project/src/train.py", line 300, in tune_hyperparams
-    study.optimize(objective, n_trials=n_trials, show_progress_bar=False)
-    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/opt/anaconda3/lib/python3.13/site-packages/optuna/study/study.py", line 490, in optimize
-    _optimize(
-    ~~~~~~~~~^
-        study=self,
-        ^^^^^^^^^^^
-    ...<7 lines>...
-        show_progress_bar=show_progress_bar,
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    )
-    ^
-  File "/opt/anaconda3/lib/python3.13/site-packages/optuna/study/_optimize.py", line 68, in _optimize
-    _optimize_sequential(
-    ~~~~~~~~~~~~~~~~~~~~^
-        study,
-        ^^^^^^
-    ...<8 lines>...
-        progress_bar=progress_bar,
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^
-    )
-    ^
-  File "/opt/anaconda3/lib/python3.13/site-packages/optuna/study/_optimize.py", line 165, in _optimize_sequential
-    frozen_trial_id = _run_trial(study, func, catch)
-  File "/opt/anaconda3/lib/python3.13/site-packages/optuna/study/_optimize.py", line 263, in _run_trial
-    raise func_err
-  File "/opt/anaconda3/lib/python3.13/site-packages/optuna/study/_optimize.py", line 206, in _run_trial
-    value_or_values = func(trial)
-  File "/Users/tomhsieh6/Desktop/MSBA Predictive Analytics/Project/Predictive-Analytics-Project/src/train.py", line 282, in objective
-    preds = models[store_id].predict(X_val)
-  File "/opt/anaconda3/lib/python3.13/site-packages/lightgbm/sklearn.py", line 1108, in predict
-    X = _LGBMValidateData(
-        self,
-    ...<11 lines>...
-        ensure_min_samples=1,
-    )
-  File "/opt/anaconda3/lib/python3.13/site-packages/sklearn/utils/validation.py", line 2944, in validate_data
-    out = check_array(X, input_name="X", **check_params)
-  File "/opt/anaconda3/lib/python3.13/site-packages/sklearn/utils/validation.py", line 1055, in check_array
-    array = _asarray_with_order(array, order=order, dtype=dtype, xp=xp)
-  File "/opt/anaconda3/lib/python3.13/site-packages/sklearn/utils/_array_api.py", line 839, in _asarray_with_order
-    array = numpy.asarray(array, order=order, dtype=dtype)
-ValueError: could not convert string to float: 'None'
