@@ -7,12 +7,12 @@
 # ── Data ────────────────────────────────────────────────────
 data:
   path: "data/"                        # folder containing raw CSVs
-  n_days: 1913                          # how many recent days to keep (memory limit)
+  n_days: 500                          # how many recent days to keep (memory limit)
   val_days: 28                         # last N days held out for validation
  
 # ── Features ────────────────────────────────────────────────
 features:
-  lags: [1, 7, 28, 364, 365]                    # lag windows
+  lags: [1, 7, 28]                    # lag windows # temporialy remoove 364, 365
   rolling_means: [3, 7, 28]           # rolling mean windows
   use_rolling_std: false               # rolling std (noisy, off by default)
  
@@ -22,19 +22,19 @@ features:
     - lag_1
     - lag_7
     - lag_28
-    - lag_364              # added
-    - lag_365              # added
+    # - lag_364              # added
+    # - lag_365              # added
     - rmean_3
     - rmean_7
     - rmean_28
     - price_change
     - price_mean_7
     - price_vs_mean        # added
-    - is_high_impact_event # added
+    # - is_high_impact_event # added
     - dayofweek
     - month
     - weekofyear
-    - is_weekend
+    # - is_weekend
     - snap
     - event_type
     - sell_price
@@ -44,17 +44,27 @@ features:
     - dept_id
     - cat_id
     - store_id
-    - state_id
+    # - state_id
     - wday
     - store_dept_mean_7 # Below are new added hierarchical features 
-    - store_cat_mean_7
-    - state_cat_mean_7
+    # - store_cat_mean_7
+    # - state_cat_mean_7
     - item_mean_across_stores_7
     # - nonzero_count_7
     # - nonzero_count_28
     # - zero_ratio_28
     # - recently_active_7
     # - recently_active_28
+    - weekday_rmean_28
+    - weekday_rmean_56
+    # - weekday_lag_7
+    # - weekday_lag_14
+    # - weekday_lag_21
+    # - weekday_lag_28
+    # - recent_28_mean
+    # - recent_7_mean
+    - recent_28_to_7_ratio
+    # - weekday_baseline_28
  
 # ── Model ────────────────────────────────────────────────────
 model:
@@ -63,13 +73,13 @@ model:
  
   lgbm:
     objective: "tweedie"
-    tweedie_variance_power: 1.1
-    n_estimators: 1000
+    tweedie_variance_power: 1.1 # change to 1.1 again
+    n_estimators: 200
     learning_rate: 0.05
     num_leaves: 255
     subsample: 0.8
     colsample_bytree: 0.8
-    early_stopping_rounds: 50         # set to null to disable
+    early_stopping_rounds: 20         # set to null to disable
     log_every: 100
  
   xgb:
@@ -87,6 +97,12 @@ model:
     models: ["lgbm", "xgb"]           # which models to combine
     weights: [0.6, 0.4]               # must sum to 1.0
  
+# ── Tuning ───────────────────────────────────────────────────
+tuning:
+  enabled: true    # set to true to run Optuna tuning
+  n_trials: 10
+
+
 # ── Output ───────────────────────────────────────────────────
 output:
   submission_path: "submission.csv"

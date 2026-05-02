@@ -2,20 +2,27 @@
 train.py
 ────────
 Main entry point for the M5 pipeline.
- 
+
 Steps:
-  1. Load config
-  2. Preprocess raw data
-  3. Build features
-  4. Time-based train/val split
-  5. Train model(s) with validation + early stopping
-  6. Retrain on full data with best n_estimators
-  7. Recursive 28-day prediction
-  8. Generate submission CSV
- 
+  1.  Load config
+  2.  Preprocess raw data
+  3.  Build features
+  4.  Time-based train/val split
+  5.  (Optional) Hyperparameter tuning via Optuna
+  6.  Train model(s) with validation + early stopping
+  7.  Retrain on full data with best n_estimators
+  8.  Recursive 28-day prediction
+  9.  Validation WRMSSE
+  10. Feature Importance
+  11. Generate submission CSV
+
 Run:
     python src/train.py
     python src/train.py --config configs/config.yaml
+
+Tuning:
+    Set tuning.enabled: true in config.yaml to run Optuna hyperparameter search.
+    Best params are automatically applied before final training.
 """
  
 import os
@@ -100,7 +107,71 @@ def time_split(df: pd.DataFrame, val_days: int):
           f"({len(val_df):,} rows)")
     return train_df, val_df
  
- 
+def compute_wrmsse(val_preds, val_actuals, train_df, sell_prices, calendar):
+    """
+    Compute WRMSSE on validation set (vectorized).
+
+    Parameters
+    ----------
+    val_preds   : np.ndarray (n_items, 28)
+    val_actuals : np.ndarray (n_items, 28)
+    train_df    : training DataFrame (before val cutoff)
+    sell_prices : raw sell_prices DataFrame
+    calendar    : raw calendar DataFrame
+
+    Returns
+    -------
+    float : WRMSSE score
+    """
+    # ── Item index ───────────────────────────────────────────
+    items = (
+        train_df[["store_id", "item_id"]]
+        .drop_duplicates()
+        .reset_index(drop=True)
+    )
+    items["idx"] = items.index
+
+    # ── Scale: vectorized first-order diff RMSE ──────────────
+    train_pivot = (
+        train_df
+        .merge(items, on=["store_id", "item_id"])
+        .pivot_table(index="idx", columns="date", values="sales", aggfunc="first")
+        .sort_index()
+    )
+    sales_matrix = train_pivot.values.astype(float)          # (n_items, n_days)
+    diffs        = np.diff(sales_matrix, axis=1)              # (n_items, n_days-1)
+    scales       = np.sqrt(np.nanmean(diffs ** 2, axis=1))   # (n_items,)
+    scales       = np.where(scales == 0, 1.0, scales)
+
+    # ── RMSSE per item ────────────────────────────────────────
+    mse   = np.mean((val_preds - val_actuals) ** 2, axis=1)  # (n_items,)
+    rmsse = np.sqrt(mse) / scales                             # (n_items,)
+
+    # ── Weights ───────────────────────────────────────────────
+    val_wks = calendar.loc[
+        calendar["date"] >= train_df["date"].max() + pd.Timedelta(days=1),
+        "wm_yr_wk"
+    ].unique()
+
+    price_avg = (
+        sell_prices[sell_prices["wm_yr_wk"].isin(val_wks)]
+        .groupby(["store_id", "item_id"])["sell_price"]
+        .mean()
+        .reset_index()
+        .rename(columns={"sell_price": "avg_price"})
+    )
+
+    items_w = items.merge(price_avg, on=["store_id", "item_id"], how="left")
+    items_w["avg_sales"] = val_actuals.mean(axis=1)
+    items_w["revenue"]   = items_w["avg_price"] * items_w["avg_sales"]
+    items_w["revenue"]   = items_w["revenue"].fillna(0)
+
+    weights = items_w["revenue"].values
+    total   = weights.sum()
+    weights = weights / total if total > 0 else weights
+
+    return float(np.sum(weights * rmsse))
+
 def build_submission(preds: np.ndarray, df: pd.DataFrame, sample_sub_path: str) -> pd.DataFrame:
     """Formats preds (30490 × 28) into a Kaggle submission DataFrame."""
     base_ids = df["id"].drop_duplicates().str.replace("_validation", "", regex=False)
@@ -181,7 +252,56 @@ def recursive_predict(df, calendar, sell_prices, features, cat_cols, models_or_a
     print("\nRecursive prediction done.")
     return np.stack(preds, axis=1)   # shape: (30490, 28)
  
- 
+def tune_hyperparams(train_df, val_df, features, cat_cols, target, cfg, calendar, sell_prices, n_trials=20):
+    """
+    Use Optuna to tune LightGBM hyperparameters based on validation WRMSSE.
+    """
+    import optuna
+    optuna.logging.set_verbosity(optuna.logging.WARNING)
+
+    def objective(trial):
+        # ── Search space ─────────────────────────────────────
+        cfg["model"]["lgbm"]["num_leaves"]              = trial.suggest_int("num_leaves", 64, 512)
+        cfg["model"]["lgbm"]["learning_rate"]           = trial.suggest_float("learning_rate", 0.01, 0.1, log=True)
+        cfg["model"]["lgbm"]["subsample"]               = trial.suggest_float("subsample", 0.5, 1.0)
+        cfg["model"]["lgbm"]["colsample_bytree"]        = trial.suggest_float("colsample_bytree", 0.5, 1.0)
+        cfg["model"]["lgbm"]["tweedie_variance_power"]  = trial.suggest_float("tweedie_variance_power", 1.0, 1.5)
+
+        # Train on train_df
+        models = train_store_models(train_df, val_df, features, target, cat_cols, cfg)
+
+        items = train_df[["store_id", "item_id"]].drop_duplicates().reset_index(drop=True)
+        items["idx"] = items.index
+        # Recursive predict on val period
+        val_preds_matrix = np.zeros((len(items), 28))
+        for store_id, store_items in items.groupby("store_id"):
+            store_mask = items["store_id"] == store_id
+            idxs = items.loc[store_mask, "idx"].values
+            val_store = val_df[val_df["store_id"] == store_id].sort_values(["item_id", "date"])
+            X_val = val_store[features]
+            preds = models[store_id].predict(X_val)
+            # reshape to (n_items_in_store, 28)
+            n_items_store = store_mask.sum()
+            val_preds_matrix[idxs] = preds.reshape(n_items_store, 28)
+
+        # Build actuals matrix
+        val_pivot = (
+            val_df.merge(items, on=["store_id", "item_id"])
+            .pivot_table(index="idx", columns="date", values="sales", aggfunc="first")
+            .sort_index()
+        )
+        val_actuals = val_pivot.values.astype(float)
+
+        wrmsse = compute_wrmsse(val_preds_matrix, val_actuals, train_df, sell_prices, calendar)
+        print(f"  Trial {trial.number}: WRMSSE={wrmsse:.4f} | params={trial.params}")
+        return wrmsse
+
+    study = optuna.create_study(direction="minimize")
+    study.optimize(objective, n_trials=n_trials, show_progress_bar=False)
+
+    print(f"\nBest WRMSSE: {study.best_value:.4f}")
+    print(f"Best params: {study.best_params}")
+    return study.best_params
 # ── Main ─────────────────────────────────────────────────────
  
 def main(config_path: str = "configs/config.yaml"):
@@ -207,7 +327,18 @@ def main(config_path: str = "configs/config.yaml"):
     target   = "sales"
     print(f"Features ({len(features)}): {features}")
     print(f"Categorical: {cat_cols}")
- 
+
+    # ── Optional: Hyperparameter Tuning ──────────────────────────
+    if cfg.get("tuning", {}).get("enabled", False):
+        print(f"\n── Hyperparameter Tuning ──")
+        n_trials = cfg.get("tuning", {}).get("n_trials", 20)
+        best_params = tune_hyperparams(
+            train_df, val_df, features, cat_cols, target, cfg,
+            calendar, sell_prices, n_trials=n_trials
+        )
+        cfg["model"]["lgbm"].update(best_params)
+        print("Config updated with best params. Retraining with best params...")
+    
     # ── 5. Train with validation (early stopping) ────────────
     skip = cfg["output"].get("skip_training", False)
  
@@ -237,8 +368,35 @@ def main(config_path: str = "configs/config.yaml"):
     print(f"\n── Step 6: Recursive 28-day prediction ──")
     preds = recursive_predict(df, calendar, sell_prices, features, cat_cols, final_models, cfg)
     print(f"Predictions shape: {preds.shape}")
-    
-    # ── 8. Feature Importance ────────────────────────────────
+
+    # ── 8. Validation WRMSSE ─────────────────────────────────────
+    print(f"\n── Step 7: Validation WRMSSE ──")
+
+    if not skip:
+        # Predict on validation period using val_models
+        val_preds_matrix = recursive_predict(
+            train_df, calendar, sell_prices, features, cat_cols, val_models, cfg
+        )
+
+        # Build actuals matrix (n_items x 28) — vectorized
+        items = train_df[["store_id", "item_id"]].drop_duplicates().reset_index(drop=True)
+        items["idx"] = items.index
+
+        val_pivot = (
+            val_df
+            .merge(items, on=["store_id", "item_id"])
+            .pivot_table(index="idx", columns="date", values="sales", aggfunc="first")
+            .sort_index()
+        )
+        val_actuals = val_pivot.values.astype(float)  # (n_items, 28)
+
+        wrmsse = compute_wrmsse(val_preds_matrix, val_actuals, train_df, sell_prices, calendar)
+        print(f"  Validation WRMSSE: {wrmsse:.4f}")
+    else:
+        print("  Skipped (skip_training=True)")
+
+
+    # ── 9. Feature Importance ────────────────────────────────
     print(f"\n── Step 8: Feature Importance ──")
 
     # take the average of feature importances across all store models

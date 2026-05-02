@@ -87,8 +87,8 @@ def build_features(df: pd.DataFrame, cfg: dict) -> pd.DataFrame:
     df["price_vs_mean"] = df["price_vs_mean"].replace([np.inf, -np.inf], 1).fillna(1)
 
     # ── Year-ago lags ────────────────────────────────────────────
-    for lag in [364, 365]:
-        df[f"lag_{lag}"] = g.shift(lag).astype("float32")
+    # for lag in [364, 365]:
+    #     df[f"lag_{lag}"] = g.shift(lag).astype("float32")
     # ── Store-dept / store-cat / state-cat hierarchical means ────
     df["store_dept_mean_7"] = (
         df.groupby(["store_id", "dept_id", "date"], observed=True)["sales"]
@@ -96,17 +96,17 @@ def build_features(df: pd.DataFrame, cfg: dict) -> pd.DataFrame:
         .astype("float32")
     )
 
-    df["store_cat_mean_7"] = (
-        df.groupby(["store_id", "cat_id", "date"], observed=True)["sales"]
-        .transform(lambda x: x.shift(1).rolling(7).mean())
-        .astype("float32")
-    )
+    # df["store_cat_mean_7"] = (
+    #     df.groupby(["store_id", "cat_id", "date"], observed=True)["sales"]
+    #     .transform(lambda x: x.shift(1).rolling(7).mean())
+    #     .astype("float32")
+    # )
 
-    df["state_cat_mean_7"] = (
-        df.groupby(["state_id", "cat_id", "date"], observed=True)["sales"]
-        .transform(lambda x: x.shift(1).rolling(7).mean())
-        .astype("float32")
-    )
+    # df["state_cat_mean_7"] = (
+    #     df.groupby(["state_id", "cat_id", "date"], observed=True)["sales"]
+    #     .transform(lambda x: x.shift(1).rolling(7).mean())
+    #     .astype("float32")
+    # )
 
     df["item_mean_across_stores_7"] = (
         df.groupby(["item_id", "date"], observed=True)["sales"]
@@ -169,7 +169,7 @@ def build_features(df: pd.DataFrame, cfg: dict) -> pd.DataFrame:
         df["recent_7_mean"] / df["recent_28_mean"]
     ).replace([np.inf, -np.inf], 1).fillna(1).astype("float32")
 
-    df["weekday_baseline_28"] = df["weekday_rmean_28"]
+    
     # ── Zero-sales features ──────────────────────────────────────
     # df["nonzero_count_7"] = (
     #     g.shift(1).rolling(7).apply(lambda x: (x > 0).sum(), raw=True)
@@ -226,6 +226,30 @@ def build_features_for_day(full_df: pd.DataFrame, cfg: dict) -> pd.DataFrame:
     full_df["month"]      = full_df["date"].dt.month
     full_df["weekofyear"] = full_df["date"].dt.isocalendar().week.astype("int")
     full_df["is_weekend"] = (full_df["dayofweek"] >= 5).astype(int)
+
+    # ── Weekday-specific features ────────────────────────────────
+    full_df["weekday_rmean_28"] = (
+        full_df.groupby(["store_id", "item_id", "dayofweek"], observed=True)["sales"]
+        .transform(lambda x: x.shift(1).rolling(4).mean())
+    )
+
+    full_df["weekday_rmean_56"] = (
+        full_df.groupby(["store_id", "item_id", "dayofweek"], observed=True)["sales"]
+        .transform(lambda x: x.shift(1).rolling(8).mean())
+    )
+
+    full_df["weekday_lag_7"]  = g["sales"].shift(7)
+    full_df["weekday_lag_14"] = g["sales"].shift(14)
+    full_df["weekday_lag_21"] = g["sales"].shift(21)
+    full_df["weekday_lag_28"] = g["sales"].shift(28)
+
+    # ── Recent mean features ─────────────────────────────────────
+    full_df["recent_28_mean"] = g["sales"].shift(1).rolling(28).mean()
+    full_df["recent_7_mean"]  = g["sales"].shift(1).rolling(7).mean()
+
+    full_df["recent_28_to_7_ratio"] = (
+        full_df["recent_7_mean"] / full_df["recent_28_mean"]
+    ).replace([np.inf, -np.inf], 1).fillna(1)
     
     # ── Zero-sales features ──────────────────────────────────────
     # full_df["nonzero_count_7"] = (
@@ -247,15 +271,15 @@ def build_features_for_day(full_df: pd.DataFrame, cfg: dict) -> pd.DataFrame:
         .transform(lambda x: x.shift(1).rolling(7).mean())
     )
 
-    full_df["store_cat_mean_7"] = (
-        full_df.groupby(["store_id", "cat_id", "date"], observed=True)["sales"]
-        .transform(lambda x: x.shift(1).rolling(7).mean())
-    )
+    # full_df["store_cat_mean_7"] = (
+    #     full_df.groupby(["store_id", "cat_id", "date"], observed=True)["sales"]
+    #     .transform(lambda x: x.shift(1).rolling(7).mean())
+    # )
 
-    full_df["state_cat_mean_7"] = (
-        full_df.groupby(["state_id", "cat_id", "date"], observed=True)["sales"]
-        .transform(lambda x: x.shift(1).rolling(7).mean())
-    )
+    # full_df["state_cat_mean_7"] = (
+    #     full_df.groupby(["state_id", "cat_id", "date"], observed=True)["sales"]
+    #     .transform(lambda x: x.shift(1).rolling(7).mean())
+    # )
 
     full_df["item_mean_across_stores_7"] = (
         full_df.groupby(["item_id", "date"], observed=True)["sales"]
