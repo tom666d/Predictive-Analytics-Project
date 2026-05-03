@@ -25,7 +25,9 @@ training:
   epochs: 8
   lr: 0.001
   weight_decay: 0.00001
-  loss: "smooth_l1"      # options: smooth_l1, mse, mae
+  loss: "asymmetric_smooth_l1_nonzero"      # options: smooth_l1, mse, mae, asymmetric_smooth_l1_nonzero
+  under_weight: 1.6
+  over_weight: 1.0
   num_workers: 0         # keep 0 for Windows/Jupyter stability
   pin_memory: false
 
@@ -40,7 +42,13 @@ model:
   use_softplus_output: true
 
 features:
-  use_price_features: true
+  use_price_features: false
+  use_activity_features: true
+  activity_version: "v2"
+  activity_feature_cols:
+    - "nonzero_ratio_28"
+    - "nonzero_ratio_90"
+    - "log1p_mean_nonzero_90"
   lags: [1, 7, 28, 365]
   rolling_means: [3, 7, 28]
   calendar_numeric_cols: ["dayofweek", "month", "weekofyear", "wday", "snap_CA", "snap_TX", "snap_WI"]
@@ -48,5 +56,5 @@ features:
   price_feature_cols: ["last_price", "future_price_mean", "price_change", "price_vs_mean"]
 
 output:
-  submission_path: "output/submission_gru_direct_config.csv"
-  save_model_path: "output/best_gru_model.pt"
+  submission_path: "output/submission_gru_activity_v2_asym_w16.csv"
+  save_model_path: "output/best_gru_activity_v2_asym_w16.pt"
