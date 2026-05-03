@@ -42,25 +42,73 @@ def prepare_calendar_features(calendar: pd.DataFrame, cfg: dict) -> Tuple[pd.Dat
     return cal_num, event_ids, event_map
 
 
-def make_lag_roll_features(series_raw: np.ndarray, end_idx: int, cfg: dict) -> np.ndarray:
-    """Build lag and rolling mean features at the forecast origin."""
+def make_lag_roll_features(series_raw, end_idx, cfg):
+    """
+    Create original lag and rolling mean features for one series at forecast origin end_idx.
+    """
+    lags = cfg["features"].get("lags", [1, 7, 28, 365])
+    rolling_means = cfg["features"].get("rolling_means", [3, 7, 28])
+
+    feats = []
+
+    for lag in lags:
+        idx = end_idx - lag
+        if idx >= 0:
+            feats.append(float(series_raw[idx]))
+        else:
+            feats.append(0.0)
+
+    hist = series_raw[:end_idx]
+
+    for window in rolling_means:
+        if len(hist) == 0:
+            feats.append(0.0)
+        else:
+            recent = hist[-window:] if len(hist) >= window else hist
+            feats.append(float(np.mean(recent)))
+
+    return np.array(feats, dtype="float32")
+
+def make_lag_roll_activity_features(series_raw, end_idx, cfg):
+    """
+    Original lag/rolling features + optional activity features.
+
+    Activity v2 features:
+    - nonzero_ratio_28
+    - nonzero_ratio_90
+    - log1p(mean_nonzero_90)
+    """
+    base = make_lag_roll_features(series_raw, end_idx, cfg)
+
+    use_activity = bool(cfg["features"].get("use_activity_features", False))
+    if not use_activity:
+        return base.astype("float32")
+
+    activity_version = cfg["features"].get("activity_version", "v2")
+
     hist = series_raw[:end_idx]
     if len(hist) == 0:
         hist = np.array([0.0], dtype="float32")
 
-    def safe_lag(k: int) -> float:
-        return float(hist[-k]) if len(hist) >= k else 0.0
+    recent_28 = hist[-28:] if len(hist) >= 28 else hist
+    recent_90 = hist[-90:] if len(hist) >= 90 else hist
 
-    def safe_rmean(k: int) -> float:
-        return float(np.mean(hist[-k:])) if len(hist) >= k else float(np.mean(hist))
+    nonzero_ratio_28 = float(np.mean(recent_28 > 0)) if len(recent_28) else 0.0
+    nonzero_ratio_90 = float(np.mean(recent_90 > 0)) if len(recent_90) else 0.0
 
-    vals = []
-    for lag in cfg["features"]["lags"]:
-        vals.append(safe_lag(int(lag)))
-    for window in cfg["features"]["rolling_means"]:
-        vals.append(safe_rmean(int(window)))
+    nonzero_90 = recent_90[recent_90 > 0]
+    mean_nonzero_90 = float(nonzero_90.mean()) if len(nonzero_90) else 0.0
 
-    return np.array(vals, dtype="float32")
+    if activity_version == "v2":
+        activity = np.array([
+            nonzero_ratio_28,
+            nonzero_ratio_90,
+            np.log1p(mean_nonzero_90),
+        ], dtype="float32")
+    else:
+        raise ValueError(f"Unsupported activity_version: {activity_version}")
+
+    return np.concatenate([base, activity]).astype("float32")
 
 
 def build_price_matrix(
@@ -162,7 +210,7 @@ def build_training_windows(
             X_list.append(series_log[input_start:target_start])
             y_list.append(series_log[target_start:target_end])
             cat_list.append(cats)
-            num_list.append(make_lag_roll_features(series_raw, target_start, cfg))
+            num_list.append(make_lag_roll_activity_features(series_raw, target_start, cfg))
             future_cal_list.append(calendar_num.loc[future_days].values.astype("float32"))
             future_event_list.append(event_ids.loc[future_days].values.astype("int64"))
             price_list.append(make_price_features(price_series, target_start, target_start, target_end))
@@ -204,7 +252,7 @@ def build_prediction_block(
     for i in range(len(X)):
         series_raw = sales_values[i]
         price_series = price_matrix[i] if use_price else None
-        X_num.append(make_lag_roll_features(series_raw, future_start_idx, cfg))
+        X_num.append(make_lag_roll_activity_features(series_raw, future_start_idx, cfg))
         X_future_cal.append(calendar_num.loc[future_days].values.astype("float32"))
         X_future_event.append(event_ids.loc[future_days].values.astype("int64"))
         X_price.append(make_price_features(price_series, future_start_idx, future_start_idx, future_start_idx + horizon))

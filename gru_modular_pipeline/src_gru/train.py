@@ -2,7 +2,7 @@
 
 import os
 from typing import Dict, Tuple
-
+import copy
 import numpy as np
 import pandas as pd
 import torch
@@ -56,14 +56,60 @@ def make_loaders(
     print(f"train windows: {len(train_ds):,} | val windows: {len(val_ds):,}")
     return train_loader, val_loader, arrays
 
+class AsymmetricSmoothL1NonzeroLoss(nn.Module):
+    """
+    SmoothL1 loss with extra penalty for underestimating nonzero target values.
+
+    Applies extra weight only when:
+    - target > 0
+    - pred < target
+    """
+
+    def __init__(self, beta=1.0, under_weight=1.6, over_weight=1.0, reduction="mean"):
+        super().__init__()
+        self.base_loss = nn.SmoothL1Loss(beta=beta, reduction="none")
+        self.under_weight = under_weight
+        self.over_weight = over_weight
+        self.reduction = reduction
+
+    def forward(self, pred, target):
+        base = self.base_loss(pred, target)
+
+        weights = torch.where(
+            (pred < target) & (target > 0),
+            torch.full_like(base, self.under_weight),
+            torch.full_like(base, self.over_weight),
+        )
+
+        loss = base * weights
+
+        if self.reduction == "mean":
+            return loss.mean()
+        if self.reduction == "sum":
+            return loss.sum()
+        return loss
 
 def get_criterion(cfg):
     loss = cfg["training"].get("loss", "smooth_l1").lower()
+
     if loss == "mse":
         return nn.MSELoss()
+
     if loss == "mae":
         return nn.L1Loss()
-    return nn.SmoothL1Loss()
+
+    if loss in ["smooth_l1", "smoothl1"]:
+        return nn.SmoothL1Loss()
+
+    if loss == "asymmetric_smooth_l1_nonzero":
+        return AsymmetricSmoothL1NonzeroLoss(
+            beta=float(cfg["training"].get("beta", 1.0)),
+            under_weight=float(cfg["training"].get("under_weight", 1.6)),
+            over_weight=float(cfg["training"].get("over_weight", 1.0)),
+            reduction="mean",
+        )
+
+    raise ValueError(f"Unsupported loss function: {loss}")
 
 
 def run_epoch(model, loader, criterion, optimizer, device, train: bool) -> float:
@@ -123,7 +169,11 @@ def train_model(model, train_loader, val_loader, cfg, device):
     if best_state is not None:
         model.load_state_dict(best_state)
         print(f"Restored best validation model: val loss={best_val:.5f}")
-
+    save_path = cfg["output"].get("save_model_path")
+    if save_path:
+        os.makedirs(os.path.dirname(save_path) or ".", exist_ok=True)
+        torch.save(model.state_dict(), save_path)
+        print("Saved model to:", save_path)
     return model, pd.DataFrame(history)
 
 
@@ -154,7 +204,6 @@ def predict_future_block(model, arrays, cfg, device) -> Tuple[np.ndarray, np.nda
 
     pred_log = np.vstack(preds).astype("float32")
     pred_raw = np.expm1(pred_log)
-    pred_raw = np.clip(pred_raw, 0, None).astype("float32")
     return pred_raw, pred_log
 
 
