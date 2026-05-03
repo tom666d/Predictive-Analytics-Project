@@ -201,56 +201,53 @@ def build_submission(preds: np.ndarray, df: pd.DataFrame, sample_sub_path: str) 
 # ── Recursive prediction ──────────────────────────────────────
  
 def recursive_predict(df, calendar, sell_prices, features, cat_cols, models_or_all, cfg):
-    """
-    Parameters
-    ----------
-    models_or_all : either {store: model}  (single model)
-                    or     {name: {store: model}}  (ensemble)
-    """
-    active   = cfg["model"]["active_model"]
+    active = cfg["model"]["active_model"]
     is_ensemble = (active == "ensemble")
- 
-    last_date    = df["date"].max()
+    
+    last_date = df["date"].max()
     future_dates = pd.date_range(last_date + pd.Timedelta(days=1), periods=28)
- 
-    # Build future frame
-    base      = df[["id", "item_id", "dept_id", "cat_id", "store_id", "state_id"]].drop_duplicates()
-    future_df = base.merge(pd.DataFrame({"date": future_dates}), how="cross")
-    future_df = future_df.merge(calendar, on="date", how="left")
-    future_df = future_df.merge(sell_prices, on=["store_id", "item_id", "wm_yr_wk"], how="left")
- 
-    # Combine history + future
-    full_df = pd.concat([df, future_df], ignore_index=True)
-    full_df = full_df.sort_values(["store_id", "item_id", "date"])
-    full_df["sales"] = full_df["sales"].astype("float64")
- 
-    # Align categorical columns
-    for col in cat_cols:
-        if col in full_df.columns:
-            full_df[col] = full_df[col].astype("category")
-            full_df[col] = full_df[col].cat.set_categories(df[col].cat.categories)
- 
-    preds = []
- 
-    print("Running recursive prediction...")
-    for i, day in enumerate(future_dates, 1):
-        print(f"  Day {i}/28: {day.date()}", end="\r")
- 
-        full_df = build_features_for_day(full_df, cfg)
- 
-        mask = full_df["date"] == day
-        X    = full_df.loc[mask, features]
- 
-        if is_ensemble:
-            y_pred = predict_store_ensemble(X, models_or_all, cfg)
-        else:
-            y_pred = predict_store(X, models_or_all)
- 
-        full_df.loc[mask, "sales"] = y_pred
-        preds.append(y_pred)
- 
+    
+    all_preds = []
+    stores = df["store_id"].unique()
+    
+    for store in stores:
+        print(f"  Predicting store: {store}")
+        store_df = df[df["store_id"] == store].copy()
+        
+        # Build future frame for this store only
+        base = store_df[["id", "item_id", "dept_id", "cat_id", "store_id", "state_id"]].drop_duplicates()
+        future_df = base.merge(pd.DataFrame({"date": future_dates}), how="cross")
+        future_df = future_df.merge(calendar, on="date", how="left")
+        future_df = future_df.merge(sell_prices, on=["store_id", "item_id", "wm_yr_wk"], how="left")
+        
+        full_df = pd.concat([store_df, future_df], ignore_index=True)
+        full_df = full_df.sort_values(["item_id", "date"])
+        full_df["sales"] = full_df["sales"].astype("float64")
+        
+        for col in cat_cols:
+            if col in full_df.columns:
+                full_df[col] = full_df[col].astype("category")
+                full_df[col] = full_df[col].cat.set_categories(df[col].cat.categories)
+        
+        store_preds = []
+        for i, day in enumerate(future_dates, 1):
+            full_df = build_features_for_day(full_df, cfg)
+            mask = full_df["date"] == day
+            X = full_df.loc[mask, features]
+            
+            if is_ensemble:
+                y_pred = predict_store_ensemble(X, models_or_all, cfg)
+            else:
+                store_models = {store: models_or_all[store]}
+                y_pred = predict_store(X, store_models)
+            
+            full_df.loc[mask, "sales"] = y_pred
+            store_preds.append(y_pred)
+        
+        all_preds.append(np.stack(store_preds, axis=1))
+    
     print("\nRecursive prediction done.")
-    return np.stack(preds, axis=1)   # shape: (30490, 28)
+    return np.vstack(all_preds)  # shape: (30490, 28)
  
 def tune_hyperparams(train_df, val_df, features, cat_cols, target, cfg, calendar, sell_prices, n_trials=20):
     """

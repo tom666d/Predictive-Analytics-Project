@@ -41,7 +41,7 @@ def load_and_preprocess(cfg: dict):
     print("Melting wide → long...")
     id_cols  = ["id", "item_id", "dept_id", "cat_id", "store_id", "state_id"]
     day_cols = [c for c in sales.columns if c.startswith("d_")]
- 
+    day_cols = day_cols[-n_days:]
     df = sales[id_cols + day_cols].melt(
         id_vars=id_cols,
         value_vars=day_cols,

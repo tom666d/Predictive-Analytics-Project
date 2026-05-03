@@ -12,59 +12,71 @@ data:
  
 # ── Features ────────────────────────────────────────────────
 features:
-  lags: [1, 7, 28]                    # lag windows # temporialy remoove 364, 365
-  rolling_means: [3, 7, 28]           # rolling mean windows
+  lags: [7, 28]                    # lag windows # temporialy remoove 364, 365
+  rolling_means: [28]           # rolling mean windows
   use_rolling_std: false               # rolling std (noisy, off by default)
  
   # Final feature list (based on feature_importance_analysis_v1)
   # Comment/uncomment to add or remove features
   use:
-    - lag_1
+    # ── Lag features ─────────────────────────────────────────
     - lag_7
     - lag_28
-    # - lag_364              # added
-    # - lag_365              # added
-    - rmean_3
-    - rmean_7
     - rmean_28
+
+    # ── Price features ───────────────────────────────────────
+    - sell_price
     - price_change
     - price_mean_7
-    - price_vs_mean        # added
-    # - is_high_impact_event # added
+    - price_vs_mean
+
+    # ── Calendar features ────────────────────────────────────
     - dayofweek
-    - month
+    - wday
     - weekofyear
-    # - is_weekend
+    - month
+    - is_weekend
     - snap
     - event_type
-    - sell_price
-    - store_sales_mean_7
-    - cat_sales_mean_7
+
+    # ── Weekday-specific features ─────────────────────────────
+    - weekday_rmean_28
+    - weekday_rmean_56
+    - recent_28_to_7_ratio
+
+    # ── Item features ─────────────────────────────────────────
     - item_id
     - dept_id
     - cat_id
     - store_id
+    - days_since_first_sale
+
+    # ── Commented out ─────────────────────────────────────────
+    # - lag_1
+    # - lag_364
+    # - lag_365
+    # - rmean_3
+    # - rmean_7
+    # - is_high_impact_event
     # - state_id
-    - wday
-    - store_dept_mean_7 # Below are new added hierarchical features 
+    # - store_sales_mean_7
+    # - cat_sales_mean_7
+    # - store_dept_mean_7
     # - store_cat_mean_7
     # - state_cat_mean_7
-    - item_mean_across_stores_7
-    # - nonzero_count_7
-    # - nonzero_count_28
-    # - zero_ratio_28
-    # - recently_active_7
-    # - recently_active_28
-    - weekday_rmean_28
-    - weekday_rmean_56
+    # - item_mean_across_stores_7
     # - weekday_lag_7
     # - weekday_lag_14
     # - weekday_lag_21
     # - weekday_lag_28
     # - recent_28_mean
     # - recent_7_mean
-    - recent_28_to_7_ratio
     # - weekday_baseline_28
+    # - nonzero_count_7
+    # - nonzero_count_28
+    # - zero_ratio_28
+    # - recently_active_7
+    # - recently_active_28
  
 # ── Model ────────────────────────────────────────────────────
 model:
@@ -108,4 +120,3 @@ output:
   submission_path: "submission.csv"
   models_dir: "models/"               # where trained model files are saved
   skip_training: false                # set to true to load saved models instead of retraining
-  

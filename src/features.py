@@ -185,6 +185,18 @@ def build_features(df: pd.DataFrame, cfg: dict) -> pd.DataFrame:
 
     # df["recently_active_7"]  = (df["nonzero_count_7"]  > 0).astype("int8")
     # df["recently_active_28"] = (df["nonzero_count_28"] > 0).astype("int8")
+    # ── Days since first sale ────────────────────────────────────
+    first_sale = (
+        df[df["sales"] > 0]
+        .groupby(["store_id", "item_id"], observed=True)["date"]
+        .min()
+        .reset_index()
+        .rename(columns={"date": "first_sale_date"})
+    )
+    df = df.merge(first_sale, on=["store_id", "item_id"], how="left")
+    df["days_since_first_sale"] = (df["date"] - df["first_sale_date"]).dt.days
+    df["days_since_first_sale"] = df["days_since_first_sale"].fillna(0).astype("int32")
+    df.drop(columns=["first_sale_date"], inplace=True)
 
     return df
 def build_features_for_day(full_df: pd.DataFrame, cfg: dict) -> pd.DataFrame:
@@ -220,12 +232,27 @@ def build_features_for_day(full_df: pd.DataFrame, cfg: dict) -> pd.DataFrame:
     full_df["price_change"] = (full_df["sell_price"] / price_lag_1)
     full_df["price_change"] = full_df["price_change"].replace([np.inf, -np.inf], 1).fillna(1)
     full_df["price_mean_7"] = pg.shift(1).rolling(7).mean()
- 
+    price_hist_mean = g["sell_price"].transform("mean")
+    full_df["price_vs_mean"] = (full_df["sell_price"] / price_hist_mean).replace([np.inf, -np.inf], 1).fillna(1)
+    
     # Calendar (safe to recompute, cheap)
     full_df["dayofweek"]  = full_df["date"].dt.dayofweek
     full_df["month"]      = full_df["date"].dt.month
     full_df["weekofyear"] = full_df["date"].dt.isocalendar().week.astype("int")
     full_df["is_weekend"] = (full_df["dayofweek"] >= 5).astype(int)
+
+    # ── Days since first sale ────────────────────────────────────
+    first_sale_dates = (
+        full_df[full_df["sales"].notna() & (full_df["sales"] > 0)]
+        .groupby(["store_id", "item_id"], observed=True)["date"]
+        .min()
+        .reset_index()
+        .rename(columns={"date": "first_sale_date"})
+    )
+    full_df = full_df.merge(first_sale_dates, on=["store_id", "item_id"], how="left")
+    full_df["days_since_first_sale"] = (full_df["date"] - full_df["first_sale_date"]).dt.days.fillna(0).astype("int32")
+    full_df.drop(columns=["first_sale_date"], inplace=True)
+    g = full_df.groupby(["store_id", "item_id"], observed=True)
 
     # ── Weekday-specific features ────────────────────────────────
     full_df["weekday_rmean_28"] = (
@@ -266,10 +293,10 @@ def build_features_for_day(full_df: pd.DataFrame, cfg: dict) -> pd.DataFrame:
     # full_df["recently_active_28"] = (full_df["nonzero_count_28"] > 0).astype(int)
 
     # ── Hierarchical means ───────────────────────────────────────
-    full_df["store_dept_mean_7"] = (
-        full_df.groupby(["store_id", "dept_id", "date"], observed=True)["sales"]
-        .transform(lambda x: x.shift(1).rolling(7).mean())
-    )
+    # full_df["store_dept_mean_7"] = (
+    #     full_df.groupby(["store_id", "dept_id", "date"], observed=True)["sales"]
+    #     .transform(lambda x: x.shift(1).rolling(7).mean())
+    # )
 
     # full_df["store_cat_mean_7"] = (
     #     full_df.groupby(["store_id", "cat_id", "date"], observed=True)["sales"]
@@ -281,10 +308,10 @@ def build_features_for_day(full_df: pd.DataFrame, cfg: dict) -> pd.DataFrame:
     #     .transform(lambda x: x.shift(1).rolling(7).mean())
     # )
 
-    full_df["item_mean_across_stores_7"] = (
-        full_df.groupby(["item_id", "date"], observed=True)["sales"]
-        .transform(lambda x: x.shift(1).rolling(7).mean())
-    )
+    # full_df["item_mean_across_stores_7"] = (
+    #     full_df.groupby(["item_id", "date"], observed=True)["sales"]
+    #     .transform(lambda x: x.shift(1).rolling(7).mean())
+    # )
     return full_df
  
  

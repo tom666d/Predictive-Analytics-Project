@@ -11,6 +11,7 @@ Usage:
 import numpy as np
 import lightgbm as lgb
 from lightgbm import LGBMRegressor
+import gc
  
 # Optional: XGBoost (only imported if needed)
 def _get_xgb():
@@ -137,14 +138,18 @@ def train_store_models(
                     verbose=log_every,
                 )
         else:
-            # Final retrain on full data — no early stopping
             if model_name == "lgbm":
                 model.fit(X_tr, y_tr, categorical_feature=cat_cols)
             else:
                 model.fit(X_tr, y_tr)
- 
+
         models[store] = model
- 
+
+        del X_tr, y_tr
+        if val_df is not None and early_stop:
+            del X_va, y_va
+        gc.collect()
+
     return models
  
  
