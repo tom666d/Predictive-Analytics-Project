@@ -90,10 +90,10 @@ model:
     objective: "regression"
     tweedie_variance_power: 1.1235258496200073 
     n_estimators: 3000
-    learning_rate: 0.02 
-    num_leaves: 200
-    subsample: 0.7093306709222214
-    colsample_bytree: 0.9224038879058452
+    learning_rate: 0.013 
+    num_leaves: 426
+    subsample: 0.642
+    colsample_bytree: 0.536
     early_stopping_rounds: 100        
     log_every: 100
    

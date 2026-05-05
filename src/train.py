@@ -218,6 +218,10 @@ def recursive_predict(df, calendar, sell_prices, features, cat_cols, models_or_a
         base = store_df[["id", "item_id", "dept_id", "cat_id", "store_id", "state_id"]].drop_duplicates()
         future_df = base.merge(pd.DataFrame({"date": future_dates}), how="cross")
         future_df = future_df.merge(calendar, on="date", how="left")
+        future_df["snap"] = 0
+        future_df.loc[future_df["state_id"] == "CA", "snap"] = future_df["snap_CA"]
+        future_df.loc[future_df["state_id"] == "TX", "snap"] = future_df["snap_TX"]
+        future_df.loc[future_df["state_id"] == "WI", "snap"] = future_df["snap_WI"]
         future_df = future_df.merge(sell_prices, on=["store_id", "item_id", "wm_yr_wk"], how="left")
         
         full_df = pd.concat([store_df, future_df], ignore_index=True)
@@ -240,7 +244,8 @@ def recursive_predict(df, calendar, sell_prices, features, cat_cols, models_or_a
             else:
                 store_models = {store: models_or_all[store]}
                 y_pred = predict_store(X, store_models)
-            
+                
+            y_pred = np.clip(y_pred, 0, None)
             full_df.loc[mask, "sales"] = y_pred
             store_preds.append(y_pred)
         
@@ -354,7 +359,7 @@ def main(config_path: str = "configs/config.yaml"):
         avg_best_iter = int(np.mean(best_iters))
         print(f"Average best iteration: {avg_best_iter}")
         cfg["model"]["lgbm"]["n_estimators"] = int(avg_best_iter * 1.1)
-        
+
         # ── 6. Retrain on full data ──────────────────────────────
         print(f"\n── Step 5: Retraining on full data ──")
         if active == "ensemble":
