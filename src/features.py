@@ -66,17 +66,17 @@ def build_features(df: pd.DataFrame, cfg: dict) -> pd.DataFrame:
     df["is_weekend"] = (df["dayofweek"] >= 5).astype("int8")
  
     # ── Hierarchical features ────────────────────────────────
-    df["store_sales_mean_7"] = (
-        df.groupby(["store_id", "date"], observed=True)["sales"]
-        .transform(lambda x: x.shift(1).rolling(7).mean())
-        .astype("float32")
-    )
+    # df["store_sales_mean_7"] = (
+    #     df.groupby(["store_id", "date"], observed=True)["sales"]
+    #     .transform(lambda x: x.shift(1).rolling(7).mean())
+    #     .astype("float32")
+    # )
  
-    df["cat_sales_mean_7"] = (
-        df.groupby(["cat_id", "date"], observed=True)["sales"]
-        .transform(lambda x: x.shift(1).rolling(7).mean())
-        .astype("float32")
-    )
+    # df["cat_sales_mean_7"] = (
+    #     df.groupby(["cat_id", "date"], observed=True)["sales"]
+    #     .transform(lambda x: x.shift(1).rolling(7).mean())
+    #     .astype("float32")
+    # )
     # ── High impact events ───────────────────────────────────────
     high_impact = ["LaborDay", "SuperBowl", "Easter"]
     df["is_high_impact_event"] = df["event_name_1"].isin(high_impact).astype("int8")
@@ -90,11 +90,11 @@ def build_features(df: pd.DataFrame, cfg: dict) -> pd.DataFrame:
     # for lag in [364, 365]:
     #     df[f"lag_{lag}"] = g.shift(lag).astype("float32")
     # ── Store-dept / store-cat / state-cat hierarchical means ────
-    df["store_dept_mean_7"] = (
-        df.groupby(["store_id", "dept_id", "date"], observed=True)["sales"]
-        .transform(lambda x: x.shift(1).rolling(7).mean())
-        .astype("float32")
-    )
+    # df["store_dept_mean_7"] = (
+    #     df.groupby(["store_id", "dept_id", "date"], observed=True)["sales"]
+    #     .transform(lambda x: x.shift(1).rolling(7).mean())
+    #     .astype("float32")
+    # )
 
     # df["store_cat_mean_7"] = (
     #     df.groupby(["store_id", "cat_id", "date"], observed=True)["sales"]
@@ -108,11 +108,11 @@ def build_features(df: pd.DataFrame, cfg: dict) -> pd.DataFrame:
     #     .astype("float32")
     # )
 
-    df["item_mean_across_stores_7"] = (
-        df.groupby(["item_id", "date"], observed=True)["sales"]
-        .transform(lambda x: x.shift(1).rolling(7).mean())
-        .astype("float32")
-    )
+    # df["item_mean_across_stores_7"] = (
+    #     df.groupby(["item_id", "date"], observed=True)["sales"]
+    #     .transform(lambda x: x.shift(1).rolling(7).mean())
+    #     .astype("float32")
+    # )
     # ── Weekday-specific recent features ─────────────────────────
     # These mimic the strong Kaggle baseline:
     # average sales over recent same weekdays.
@@ -234,7 +234,7 @@ def build_features_for_day(full_df: pd.DataFrame, cfg: dict) -> pd.DataFrame:
     full_df["price_mean_7"] = pg.shift(1).rolling(7).mean()
     price_hist_mean = g["sell_price"].transform("mean")
     full_df["price_vs_mean"] = (full_df["sell_price"] / price_hist_mean).replace([np.inf, -np.inf], 1).fillna(1)
-    
+
     # Calendar (safe to recompute, cheap)
     full_df["dayofweek"]  = full_df["date"].dt.dayofweek
     full_df["month"]      = full_df["date"].dt.month
@@ -312,6 +312,8 @@ def build_features_for_day(full_df: pd.DataFrame, cfg: dict) -> pd.DataFrame:
     #     full_df.groupby(["item_id", "date"], observed=True)["sales"]
     #     .transform(lambda x: x.shift(1).rolling(7).mean())
     # )
+    high_impact = ["LaborDay", "SuperBowl", "Easter"]
+    full_df["is_high_impact_event"] = full_df["event_name_1"].isin(high_impact).astype("int8")
     return full_df
  
  

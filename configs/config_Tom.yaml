@@ -13,7 +13,7 @@ data:
 # ── Features ────────────────────────────────────────────────
 features:
   lags: [28, 35, 42, 364, 365]                    # lag windows 
-  rolling_means: [7,28]           # rolling mean windows
+  rolling_means: [28]           # rolling mean windows
   use_rolling_std: false               # rolling std (noisy, off by default)
  
   # Final feature list (based on feature_importance_analysis_v1)
@@ -26,7 +26,7 @@ features:
     - lag_42
     - lag_364
     - lag_365
-    - rmean_7
+    # - rmean_7
     - rmean_28
 
     # ── Price features ───────────────────────────────────────
@@ -61,7 +61,6 @@ features:
     # - lag_1
     # - rmean_3
     # - rmean_7
-    # - is_high_impact_event
     # - state_id
     # - store_sales_mean_7
     # - cat_sales_mean_7
@@ -88,16 +87,16 @@ model:
   active_model: "lgbm"
  
   lgbm:
-    objective: "tweedie"
+    objective: "regression"
     tweedie_variance_power: 1.1235258496200073 
-    n_estimators: 1000
-    learning_rate: 0.012849210995834437 # 0.02 probably can yield better results with more trees
-    num_leaves: 158
+    n_estimators: 3000
+    learning_rate: 0.02 
+    num_leaves: 200
     subsample: 0.7093306709222214
     colsample_bytree: 0.9224038879058452
-    early_stopping_rounds: 50         
+    early_stopping_rounds: 100        
     log_every: 100
- 
+   
   xgb:
     objective: "reg:tweedie"
     tweedie_variance_power: 1.1

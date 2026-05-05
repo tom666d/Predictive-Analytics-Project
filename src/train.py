@@ -349,7 +349,12 @@ def main(config_path: str = "configs/config.yaml"):
             val_models = train_ensemble_models(train_df, val_df, features, target, cat_cols, cfg)
         else:
             val_models = train_store_models(train_df, val_df, features, target, cat_cols, cfg)
- 
+        best_iters = [m.best_iteration_ for m in val_models.values()]
+
+        avg_best_iter = int(np.mean(best_iters))
+        print(f"Average best iteration: {avg_best_iter}")
+        cfg["model"]["lgbm"]["n_estimators"] = int(avg_best_iter * 1.1)
+        
         # ── 6. Retrain on full data ──────────────────────────────
         print(f"\n── Step 5: Retraining on full data ──")
         if active == "ensemble":

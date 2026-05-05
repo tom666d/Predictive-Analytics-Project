@@ -27,14 +27,18 @@ def _get_xgb():
 def get_lgbm_model(cfg: dict) -> LGBMRegressor:
     p = cfg["model"]["lgbm"]
     return LGBMRegressor(
-        objective             = p["objective"],
-        tweedie_variance_power= p["tweedie_variance_power"],
-        n_estimators          = p["n_estimators"],
-        learning_rate         = p["learning_rate"],
-        num_leaves            = p["num_leaves"],
-        subsample             = p["subsample"],
-        colsample_bytree      = p["colsample_bytree"],
-    )
+    objective              = p["objective"],
+    tweedie_variance_power = p["tweedie_variance_power"],
+    n_estimators           = p["n_estimators"],
+    learning_rate          = p["learning_rate"],
+    num_leaves             = p["num_leaves"],
+    subsample              = p["subsample"],
+    colsample_bytree       = p["colsample_bytree"],
+    min_child_samples      = p.get("min_child_samples", 20),
+    reg_alpha              = p.get("reg_alpha", 0.0),
+    reg_lambda             = p.get("reg_lambda", 0.0),
+    min_split_gain         = p.get("min_split_gain", 0.0),
+)
  
  
 def get_xgb_model(cfg: dict):

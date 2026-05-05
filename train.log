@@ -10,114 +10,235 @@ Preprocessing done. df shape: (58327370, 14)
 ── Step 3: Train/val split ──
 Train: 2011-01-29 → 2016-03-27 (57,473,650 rows)
 Val  : 2016-03-28 → 2016-04-24 (853,720 rows)
-Features (27): ['lag_28', 'lag_35', 'lag_42', 'lag_364', 'lag_365', 'rmean_7', 'rmean_28', 'sell_price', 'price_change', 'price_mean_7', 'price_vs_mean', 'dayofweek', 'wday', 'weekofyear', 'month', 'is_weekend', 'snap', 'event_type', 'is_high_impact_event', 'weekday_rmean_28', 'weekday_rmean_56', 'recent_28_to_7_ratio', 'item_id', 'dept_id', 'cat_id', 'store_id', 'days_since_first_sale']
+Features (26): ['lag_28', 'lag_35', 'lag_42', 'lag_364', 'lag_365', 'rmean_28', 'sell_price', 'price_change', 'price_mean_7', 'price_vs_mean', 'dayofweek', 'wday', 'weekofyear', 'month', 'is_weekend', 'snap', 'event_type', 'is_high_impact_event', 'weekday_rmean_28', 'weekday_rmean_56', 'recent_28_to_7_ratio', 'item_id', 'dept_id', 'cat_id', 'store_id', 'days_since_first_sale']
 Categorical: ['event_type', 'item_id', 'dept_id', 'cat_id', 'store_id']
 
 ── Step 4: Training (lgbm) with validation ──
   Training lgbm — store: CA_1
 [LightGBM] [Warning] Categorical features with more bins than the configured maximum bin number found.
 [LightGBM] [Warning] For categorical features, max_bin and max_bin_by_feature may be ignored with a large number of categories.
-[LightGBM] [Info] Auto-choosing row-wise multi-threading, the overhead of testing was 0.185863 seconds.
+[LightGBM] [Info] Auto-choosing row-wise multi-threading, the overhead of testing was 0.191217 seconds.
 You can set `force_row_wise=true` to remove the overhead.
 And if memory is not enough, you can set `force_col_wise=true`.
-[LightGBM] [Info] Total Bins 5888
-[LightGBM] [Info] Number of data points in the train set: 5747365, number of used features: 27
-[LightGBM] [Info] Start training from score 0.275486
-[100]	valid_0's rmse: 2.24506	valid_0's tweedie: 12.1857
-[200]	valid_0's rmse: 2.03325	valid_0's tweedie: 12.1101
-[300]	valid_0's rmse: 2.01902	valid_0's tweedie: 12.1014
-[400]	valid_0's rmse: 2.01721	valid_0's tweedie: 12.0998
-[500]	valid_0's rmse: 2.01587	valid_0's tweedie: 12.0993
-[600]	valid_0's rmse: 2.01573	valid_0's tweedie: 12.0989
+[LightGBM] [Info] Total Bins 5633
+[LightGBM] [Info] Number of data points in the train set: 5747365, number of used features: 26
+[LightGBM] [Info] Start training from score 1.317171
+[100]	valid_0's rmse: 2.05209	valid_0's l2: 4.21108
+[200]	valid_0's rmse: 2.01849	valid_0's l2: 4.07429
+[300]	valid_0's rmse: 2.01834	valid_0's l2: 4.07368
   Training lgbm — store: CA_2
 [LightGBM] [Warning] Categorical features with more bins than the configured maximum bin number found.
 [LightGBM] [Warning] For categorical features, max_bin and max_bin_by_feature may be ignored with a large number of categories.
-[LightGBM] [Info] Auto-choosing row-wise multi-threading, the overhead of testing was 0.245331 seconds.
+[LightGBM] [Info] Auto-choosing row-wise multi-threading, the overhead of testing was 0.205324 seconds.
 You can set `force_row_wise=true` to remove the overhead.
 And if memory is not enough, you can set `force_col_wise=true`.
-[LightGBM] [Info] Total Bins 5639
-[LightGBM] [Info] Number of data points in the train set: 5747365, number of used features: 27
-[LightGBM] [Info] Start training from score -0.033064
-[100]	valid_0's rmse: 2.09429	valid_0's tweedie: 12.0834
-[200]	valid_0's rmse: 1.88161	valid_0's tweedie: 12.0265
-[300]	valid_0's rmse: 1.85427	valid_0's tweedie: 12.0206
-[400]	valid_0's rmse: 1.84894	valid_0's tweedie: 12.0203
+[LightGBM] [Info] Total Bins 5389
+[LightGBM] [Info] Number of data points in the train set: 5747365, number of used features: 26
+[LightGBM] [Info] Start training from score 0.967477
+[100]	valid_0's rmse: 1.89916	valid_0's l2: 3.60683
+[200]	valid_0's rmse: 1.85258	valid_0's l2: 3.43205
+[300]	valid_0's rmse: 1.85048	valid_0's l2: 3.42428
   Training lgbm — store: CA_3
 [LightGBM] [Warning] Categorical features with more bins than the configured maximum bin number found.
 [LightGBM] [Warning] For categorical features, max_bin and max_bin_by_feature may be ignored with a large number of categories.
-[LightGBM] [Info] Auto-choosing row-wise multi-threading, the overhead of testing was 0.165572 seconds.
+[LightGBM] [Info] Auto-choosing row-wise multi-threading, the overhead of testing was 0.192652 seconds.
 You can set `force_row_wise=true` to remove the overhead.
 And if memory is not enough, you can set `force_col_wise=true`.
-[LightGBM] [Info] Total Bins 6195
-[LightGBM] [Info] Number of data points in the train set: 5747365, number of used features: 27
-[LightGBM] [Info] Start training from score 0.650172
-[100]	valid_0's rmse: 2.91754	valid_0's tweedie: 16.1089
-[200]	valid_0's rmse: 2.49702	valid_0's tweedie: 16.006
-[300]	valid_0's rmse: 2.46763	valid_0's tweedie: 15.9935
-[400]	valid_0's rmse: 2.46089	valid_0's tweedie: 15.9906
-[500]	valid_0's rmse: 2.45369	valid_0's tweedie: 15.9888
-[600]	valid_0's rmse: 2.44855	valid_0's tweedie: 15.9874
-[700]	valid_0's rmse: 2.44661	valid_0's tweedie: 15.9866
-[800]	valid_0's rmse: 2.44593	valid_0's tweedie: 15.9862
-[900]	valid_0's rmse: 2.44532	valid_0's tweedie: 15.9862
+[LightGBM] [Info] Total Bins 5940
+[LightGBM] [Info] Number of data points in the train set: 5747365, number of used features: 26
+[LightGBM] [Info] Start training from score 1.915871
+[100]	valid_0's rmse: 2.53088	valid_0's l2: 6.40534
+[200]	valid_0's rmse: 2.46359	valid_0's l2: 6.06927
+[300]	valid_0's rmse: 2.45771	valid_0's l2: 6.04034
+[400]	valid_0's rmse: 2.45552	valid_0's l2: 6.02956
+[500]	valid_0's rmse: 2.45311	valid_0's l2: 6.01773
+[600]	valid_0's rmse: 2.45306	valid_0's l2: 6.01748
   Training lgbm — store: CA_4
 [LightGBM] [Warning] Categorical features with more bins than the configured maximum bin number found.
 [LightGBM] [Warning] For categorical features, max_bin and max_bin_by_feature may be ignored with a large number of categories.
-[LightGBM] [Info] Auto-choosing row-wise multi-threading, the overhead of testing was 0.233564 seconds.
+[LightGBM] [Info] Auto-choosing row-wise multi-threading, the overhead of testing was 0.190749 seconds.
 You can set `force_row_wise=true` to remove the overhead.
 And if memory is not enough, you can set `force_col_wise=true`.
-[LightGBM] [Info] Total Bins 5407
-[LightGBM] [Info] Number of data points in the train set: 5747365, number of used features: 27
-[LightGBM] [Info] Start training from score -0.355108
-[100]	valid_0's rmse: 1.408	valid_0's tweedie: 7.67551
-[200]	valid_0's rmse: 1.34193	valid_0's tweedie: 7.63897
-[300]	valid_0's rmse: 1.33939	valid_0's tweedie: 7.63523
+[LightGBM] [Info] Total Bins 5230
+[LightGBM] [Info] Number of data points in the train set: 5747365, number of used features: 26
+[LightGBM] [Info] Start training from score 0.701097
+[100]	valid_0's rmse: 1.34778	valid_0's l2: 1.8165
+[200]	valid_0's rmse: 1.33925	valid_0's l2: 1.7936
+[300]	valid_0's rmse: 1.33821	valid_0's l2: 1.7908
+[400]	valid_0's rmse: 1.33711	valid_0's l2: 1.78786
+[500]	valid_0's rmse: 1.33682	valid_0's l2: 1.78709
   Training lgbm — store: TX_1
 [LightGBM] [Warning] Categorical features with more bins than the configured maximum bin number found.
 [LightGBM] [Warning] For categorical features, max_bin and max_bin_by_feature may be ignored with a large number of categories.
-[LightGBM] [Info] Auto-choosing row-wise multi-threading, the overhead of testing was 0.247465 seconds.
+[LightGBM] [Info] Auto-choosing row-wise multi-threading, the overhead of testing was 0.222613 seconds.
 You can set `force_row_wise=true` to remove the overhead.
 And if memory is not enough, you can set `force_col_wise=true`.
-[LightGBM] [Info] Total Bins 6001
-[LightGBM] [Info] Number of data points in the train set: 5747365, number of used features: 27
-[LightGBM] [Info] Start training from score -0.043536
-[100]	valid_0's rmse: 1.86865	valid_0's tweedie: 9.02284
-[200]	valid_0's rmse: 1.61472	valid_0's tweedie: 8.95906
-[300]	valid_0's rmse: 1.59403	valid_0's tweedie: 8.95193
-[400]	valid_0's rmse: 1.59186	valid_0's tweedie: 8.95037
-[500]	valid_0's rmse: 1.59091	valid_0's tweedie: 8.94968
-[600]	valid_0's rmse: 1.59043	valid_0's tweedie: 8.94942
+[LightGBM] [Info] Total Bins 5746
+[LightGBM] [Info] Number of data points in the train set: 5747365, number of used features: 26
+[LightGBM] [Info] Start training from score 0.957398
+[100]	valid_0's rmse: 1.64305	valid_0's l2: 2.69963
+[200]	valid_0's rmse: 1.60701	valid_0's l2: 2.58247
+[300]	valid_0's rmse: 1.60608	valid_0's l2: 2.5795
+[400]	valid_0's rmse: 1.606	valid_0's l2: 2.57924
   Training lgbm — store: TX_2
 [LightGBM] [Warning] Categorical features with more bins than the configured maximum bin number found.
 [LightGBM] [Warning] For categorical features, max_bin and max_bin_by_feature may be ignored with a large number of categories.
-[LightGBM] [Info] Auto-choosing row-wise multi-threading, the overhead of testing was 0.311153 seconds.
+[LightGBM] [Info] Auto-choosing row-wise multi-threading, the overhead of testing was 0.234642 seconds.
 You can set `force_row_wise=true` to remove the overhead.
 And if memory is not enough, you can set `force_col_wise=true`.
-[LightGBM] [Info] Total Bins 6138
-[LightGBM] [Info] Number of data points in the train set: 5747365, number of used features: 27
-[LightGBM] [Info] Start training from score 0.211956
-[100]	valid_0's rmse: 2.00475	valid_0's tweedie: 10.5424
-[200]	valid_0's rmse: 1.70607	valid_0's tweedie: 10.4735
+[LightGBM] [Info] Total Bins 5883
+[LightGBM] [Info] Number of data points in the train set: 5747365, number of used features: 26
+[LightGBM] [Info] Start training from score 1.236093
+[100]	valid_0's rmse: 1.71813	valid_0's l2: 2.95196
+[200]	valid_0's rmse: 1.70236	valid_0's l2: 2.89802
   Training lgbm — store: TX_3
 [LightGBM] [Warning] Categorical features with more bins than the configured maximum bin number found.
 [LightGBM] [Warning] For categorical features, max_bin and max_bin_by_feature may be ignored with a large number of categories.
-[LightGBM] [Info] Auto-choosing row-wise multi-threading, the overhead of testing was 0.311783 seconds.
+[LightGBM] [Info] Auto-choosing row-wise multi-threading, the overhead of testing was 0.280152 seconds.
 You can set `force_row_wise=true` to remove the overhead.
 And if memory is not enough, you can set `force_col_wise=true`.
-[LightGBM] [Info] Total Bins 5938
-[LightGBM] [Info] Number of data points in the train set: 5747365, number of used features: 27
-[LightGBM] [Info] Start training from score 0.040165
-[100]	valid_0's rmse: 1.96375	valid_0's tweedie: 10.2323
-[200]	valid_0's rmse: 1.69401	valid_0's tweedie: 10.167
-[300]	valid_0's rmse: 1.68258	valid_0's tweedie: 10.1603
+[LightGBM] [Info] Total Bins 5683
+[LightGBM] [Info] Number of data points in the train set: 5747365, number of used features: 26
+[LightGBM] [Info] Start training from score 1.040983
+[100]	valid_0's rmse: 1.71145	valid_0's l2: 2.92905
+[200]	valid_0's rmse: 1.69611	valid_0's l2: 2.8768
   Training lgbm — store: WI_1
 [LightGBM] [Warning] Categorical features with more bins than the configured maximum bin number found.
 [LightGBM] [Warning] For categorical features, max_bin and max_bin_by_feature may be ignored with a large number of categories.
-[LightGBM] [Info] Auto-choosing row-wise multi-threading, the overhead of testing was 0.209023 seconds.
+[LightGBM] [Info] Auto-choosing row-wise multi-threading, the overhead of testing was 0.226299 seconds.
 You can set `force_row_wise=true` to remove the overhead.
 And if memory is not enough, you can set `force_col_wise=true`.
-[LightGBM] [Info] Total Bins 5623
-[LightGBM] [Info] Number of data points in the train set: 5747365, number of used features: 27
-[LightGBM] [Info] Start training from score -0.130982
-[100]	valid_0's rmse: 1.74216	valid_0's tweedie: 10.567
-[200]	valid_0's rmse: 1.60515	valid_0's tweedie: 10.5162
+[LightGBM] [Info] Total Bins 5373
+[LightGBM] [Info] Number of data points in the train set: 5747365, number of used features: 26
+[LightGBM] [Info] Start training from score 0.877233
+[100]	valid_0's rmse: 1.61812	valid_0's l2: 2.61832
+[200]	valid_0's rmse: 1.59477	valid_0's l2: 2.5433
+  Training lgbm — store: WI_2
+[LightGBM] [Warning] Categorical features with more bins than the configured maximum bin number found.
+[LightGBM] [Warning] For categorical features, max_bin and max_bin_by_feature may be ignored with a large number of categories.
+[LightGBM] [Info] Auto-choosing row-wise multi-threading, the overhead of testing was 0.217864 seconds.
+You can set `force_row_wise=true` to remove the overhead.
+And if memory is not enough, you can set `force_col_wise=true`.
+[LightGBM] [Info] Total Bins 5590
+[LightGBM] [Info] Number of data points in the train set: 5747365, number of used features: 26
+[LightGBM] [Info] Start training from score 1.112327
+[100]	valid_0's rmse: 2.77226	valid_0's l2: 7.6854
+[200]	valid_0's rmse: 2.65007	valid_0's l2: 7.02287
+[300]	valid_0's rmse: 2.63624	valid_0's l2: 6.94976
+[400]	valid_0's rmse: 2.63527	valid_0's l2: 6.94467
+[500]	valid_0's rmse: 2.63683	valid_0's l2: 6.95289
+  Training lgbm — store: WI_3
+[LightGBM] [Warning] Categorical features with more bins than the configured maximum bin number found.
+[LightGBM] [Warning] For categorical features, max_bin and max_bin_by_feature may be ignored with a large number of categories.
+[LightGBM] [Info] Auto-choosing row-wise multi-threading, the overhead of testing was 0.249014 seconds.
+You can set `force_row_wise=true` to remove the overhead.
+And if memory is not enough, you can set `force_col_wise=true`.
+[LightGBM] [Info] Total Bins 5679
+[LightGBM] [Info] Number of data points in the train set: 5747365, number of used features: 26
+[LightGBM] [Info] Start training from score 1.098934
+[100]	valid_0's rmse: 1.9253	valid_0's l2: 3.70678
+[200]	valid_0's rmse: 1.84461	valid_0's l2: 3.4026
+[300]	valid_0's rmse: 1.83891	valid_0's l2: 3.38157
+[400]	valid_0's rmse: 1.83977	valid_0's l2: 3.38475
+
+── Step 5: Retraining on full data ──
+  Training lgbm — store: CA_1
+[LightGBM] [Warning] Categorical features with more bins than the configured maximum bin number found.
+[LightGBM] [Warning] For categorical features, max_bin and max_bin_by_feature may be ignored with a large number of categories.
+[LightGBM] [Info] Auto-choosing row-wise multi-threading, the overhead of testing was 0.216132 seconds.
+You can set `force_row_wise=true` to remove the overhead.
+And if memory is not enough, you can set `force_col_wise=true`.
+[LightGBM] [Info] Total Bins 5653
+[LightGBM] [Info] Number of data points in the train set: 5832737, number of used features: 26
+[LightGBM] [Info] Start training from score 1.319829
+  Training lgbm — store: CA_2
+[LightGBM] [Warning] Categorical features with more bins than the configured maximum bin number found.
+[LightGBM] [Warning] For categorical features, max_bin and max_bin_by_feature may be ignored with a large number of categories.
+[LightGBM] [Info] Auto-choosing row-wise multi-threading, the overhead of testing was 0.227956 seconds.
+You can set `force_row_wise=true` to remove the overhead.
+And if memory is not enough, you can set `force_col_wise=true`.
+[LightGBM] [Info] Total Bins 5395
+[LightGBM] [Info] Number of data points in the train set: 5832737, number of used features: 26
+[LightGBM] [Info] Start training from score 0.974753
+  Training lgbm — store: CA_3
+[LightGBM] [Warning] Categorical features with more bins than the configured maximum bin number found.
+[LightGBM] [Warning] For categorical features, max_bin and max_bin_by_feature may be ignored with a large number of categories.
+[LightGBM] [Info] Auto-choosing row-wise multi-threading, the overhead of testing was 0.185318 seconds.
+You can set `force_row_wise=true` to remove the overhead.
+And if memory is not enough, you can set `force_col_wise=true`.
+[LightGBM] [Info] Total Bins 5930
+[LightGBM] [Info] Number of data points in the train set: 5832737, number of used features: 26
+[LightGBM] [Info] Start training from score 1.918170
+  Training lgbm — store: CA_4
+[LightGBM] [Warning] Categorical features with more bins than the configured maximum bin number found.
+[LightGBM] [Warning] For categorical features, max_bin and max_bin_by_feature may be ignored with a large number of categories.
+[LightGBM] [Info] Auto-choosing row-wise multi-threading, the overhead of testing was 0.253006 seconds.
+You can set `force_row_wise=true` to remove the overhead.
+And if memory is not enough, you can set `force_col_wise=true`.
+[LightGBM] [Info] Total Bins 5240
+[LightGBM] [Info] Number of data points in the train set: 5832737, number of used features: 26
+[LightGBM] [Info] Start training from score 0.703559
+  Training lgbm — store: TX_1
+[LightGBM] [Warning] Categorical features with more bins than the configured maximum bin number found.
+[LightGBM] [Warning] For categorical features, max_bin and max_bin_by_feature may be ignored with a large number of categories.
+[LightGBM] [Info] Auto-choosing row-wise multi-threading, the overhead of testing was 0.223827 seconds.
+You can set `force_row_wise=true` to remove the overhead.
+And if memory is not enough, you can set `force_col_wise=true`.
+[LightGBM] [Info] Total Bins 5771
+[LightGBM] [Info] Number of data points in the train set: 5832737, number of used features: 26
+[LightGBM] [Info] Start training from score 0.959291
+  Training lgbm — store: TX_2
+[LightGBM] [Warning] Categorical features with more bins than the configured maximum bin number found.
+[LightGBM] [Warning] For categorical features, max_bin and max_bin_by_feature may be ignored with a large number of categories.
+[LightGBM] [Info] Auto-choosing row-wise multi-threading, the overhead of testing was 0.216575 seconds.
+You can set `force_row_wise=true` to remove the overhead.
+And if memory is not enough, you can set `force_col_wise=true`.
+[LightGBM] [Info] Total Bins 5885
+[LightGBM] [Info] Number of data points in the train set: 5832737, number of used features: 26
+[LightGBM] [Info] Start training from score 1.236878
+  Training lgbm — store: TX_3
+[LightGBM] [Warning] Categorical features with more bins than the configured maximum bin number found.
+[LightGBM] [Warning] For categorical features, max_bin and max_bin_by_feature may be ignored with a large number of categories.
+[LightGBM] [Info] Auto-choosing row-wise multi-threading, the overhead of testing was 0.240155 seconds.
+You can set `force_row_wise=true` to remove the overhead.
+And if memory is not enough, you can set `force_col_wise=true`.
+[LightGBM] [Info] Total Bins 5829
+[LightGBM] [Info] Number of data points in the train set: 5832737, number of used features: 26
+[LightGBM] [Info] Start training from score 1.043992
+  Training lgbm — store: WI_1
+[LightGBM] [Warning] Categorical features with more bins than the configured maximum bin number found.
+[LightGBM] [Warning] For categorical features, max_bin and max_bin_by_feature may be ignored with a large number of categories.
+[LightGBM] [Info] Auto-choosing row-wise multi-threading, the overhead of testing was 0.314041 seconds.
+You can set `force_row_wise=true` to remove the overhead.
+And if memory is not enough, you can set `force_col_wise=true`.
+[LightGBM] [Info] Total Bins 5385
+[LightGBM] [Info] Number of data points in the train set: 5832737, number of used features: 26
+[LightGBM] [Info] Start training from score 0.882787
+  Training lgbm — store: WI_2
+[LightGBM] [Warning] Categorical features with more bins than the configured maximum bin number found.
+[LightGBM] [Warning] For categorical features, max_bin and max_bin_by_feature may be ignored with a large number of categories.
+[LightGBM] [Info] Auto-choosing row-wise multi-threading, the overhead of testing was 0.209125 seconds.
+You can set `force_row_wise=true` to remove the overhead.
+And if memory is not enough, you can set `force_col_wise=true`.
+[LightGBM] [Info] Total Bins 5667
+[LightGBM] [Info] Number of data points in the train set: 5832737, number of used features: 26
+[LightGBM] [Info] Start training from score 1.121945
+  Training lgbm — store: WI_3
+[LightGBM] [Warning] Categorical features with more bins than the configured maximum bin number found.
+[LightGBM] [Warning] For categorical features, max_bin and max_bin_by_feature may be ignored with a large number of categories.
+[LightGBM] [Info] Auto-choosing row-wise multi-threading, the overhead of testing was 0.334178 seconds.
+You can set `force_row_wise=true` to remove the overhead.
+And if memory is not enough, you can set `force_col_wise=true`.
+[LightGBM] [Info] Total Bins 5686
+[LightGBM] [Info] Number of data points in the train set: 5832737, number of used features: 26
+[LightGBM] [Info] Start training from score 1.102018
+Models saved to: models/
+
+── Step 6: Recursive 28-day prediction ──
+  Predicting store: CA_1
+  Predicting store: CA_2
+  Predicting store: CA_3
+  Predicting store: CA_4
+  Predicting store: TX_1
+  Predicting store: TX_2
+  Predicting store: TX_3
