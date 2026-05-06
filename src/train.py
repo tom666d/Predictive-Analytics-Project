@@ -244,7 +244,7 @@ def recursive_predict(df, calendar, sell_prices, features, cat_cols, models_or_a
             else:
                 store_models = {store: models_or_all[store]}
                 y_pred = predict_store(X, store_models)
-                
+
             y_pred = np.clip(y_pred, 0, None)
             full_df.loc[mask, "sales"] = y_pred
             store_preds.append(y_pred)
@@ -354,11 +354,11 @@ def main(config_path: str = "configs/config.yaml"):
             val_models = train_ensemble_models(train_df, val_df, features, target, cat_cols, cfg)
         else:
             val_models = train_store_models(train_df, val_df, features, target, cat_cols, cfg)
-        best_iters = [m.best_iteration_ for m in val_models.values()]
+        
 
-        avg_best_iter = int(np.mean(best_iters))
-        print(f"Average best iteration: {avg_best_iter}")
-        cfg["model"]["lgbm"]["n_estimators"] = int(avg_best_iter * 1.1)
+        max_best_iter = max(m.best_iteration_ for m in val_models.values())
+        print(f"Max best iteration: {max_best_iter} → retraining with {int(max_best_iter * 1.1)} trees")
+        cfg["model"]["lgbm"]["n_estimators"] = int(max_best_iter * 1.1)
 
         # ── 6. Retrain on full data ──────────────────────────────
         print(f"\n── Step 5: Retraining on full data ──")
